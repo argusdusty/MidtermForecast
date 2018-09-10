@@ -200,7 +200,7 @@ func merge_house_classes(now time.Time) (map[string][2]float64, map[string]map[s
 	var extra_polls map[string][]Poll
 	dec = json.NewDecoder(f)
 	dec.Decode(&extra_polls)
-	polling_data := []map[string][]Poll{polling_data_538, extra_polls}
+	polling_data := []map[string][]Poll{polling_data_538, extra_polls, LoadNYTLivePolls()}
 
 	pvi_estimates_dist := make(map[string]float64, len(districts))
 	for _, d := range districts {

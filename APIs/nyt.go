@@ -1,10 +1,14 @@
 package APIs
 
 import (
+	. "MidtermForecast/Utils"
 	"compress/zlib"
+	"encoding/json"
 	"io/ioutil"
+	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // 2008, 2010
@@ -146,4 +150,56 @@ func LoadNYTHouseResults(year string) map[string][2]float64 {
 		}
 	}
 	return results
+}
+
+func parseTime(value string) time.Time {
+	// e.g. Sept. 6, Oct. 10
+	vals := strings.Split(value, " ")
+	month := map[string]time.Month{
+		"Aug.":  time.August,
+		"Sept.": time.September,
+		"Oct.":  time.October,
+		"Nov.":  time.November,
+		"Dec.":  time.December,
+	}[vals[0]]
+	day, err := strconv.Atoi(vals[1])
+	if err != nil {
+		panic(err)
+	}
+	return time.Date(2018, month, day, 0, 0, 0, 0, time.UTC)
+}
+
+// Load ongoing polls from https://www.nytimes.com/interactive/2018/upshot/elections-polls.html
+// Partial data is better than no data
+func LoadNYTLivePolls() map[string][]Poll {
+	resp, err := http.Get("https://int.nyt.com/newsgraphics/2018/live-polls-2018/all-races.json")
+	if err != nil {
+		panic(err)
+	}
+	defer resp.Body.Close()
+	var data []map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
+		panic(err)
+	}
+	var r = make(map[string][]Poll)
+	for _, p := range data {
+		var poll Poll
+		seat := p["id"].(string)
+		if len(seat) == 4 {
+			if seat[2:] == "AL" {
+				// Just in case
+				seat = seat[:2] + "00"
+			}
+			seat = seat[:2] + "-" + seat[2:]
+		}
+		poll.Pollster = "Siena College"
+		poll.URL = "https://www.nytimes.com/interactive/2018/upshot/" + p["page_id"].(string) + ".html"
+		poll.StartDate = parseTime(p["startDate"].(string))
+		poll.EndDate = parseTime(p["endDate"].(string))
+		poll.Subpopulation = "LV"
+		poll.Number = p["n"].(float64)
+		poll.Candidates = map[string]float64{"D": p["nDem"].(float64), "R": p["nRep"].(float64)}
+		r[seat] = append(r[seat], poll)
+	}
+	return r
 }

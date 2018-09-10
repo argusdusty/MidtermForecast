@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -16,6 +17,7 @@ func LoadCache(url, file string, maxAge time.Duration) *bytes.Reader {
 		if err != nil {
 			panic(err)
 		}
+		os.MkdirAll(filepath.Dir(file), 0666)
 		f, err := os.Create(file)
 		if err != nil {
 			panic(err)

@@ -344,7 +344,7 @@ func main() {
 	if len(os.Args) > 1 && os.Args[1] == "once" {
 		return
 	}
-	for range time.Tick(4 * time.Hour) {
+	for range time.Tick(1 * time.Hour) {
 		forecast()
 	}
 }

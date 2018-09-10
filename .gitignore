@@ -1,0 +1,9 @@
+*.exe
+*.gz
+*.log
+*.zip
+*.sublime-project
+*.sublime-workspace
+/cache
+/certs
+/forecast

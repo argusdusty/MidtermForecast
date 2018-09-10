@@ -1,0 +1,341 @@
+{
+  "AZ": [
+    {
+      "pollster": "OH Predictive Insights/MBQF",
+      "start": "2018-07-24T00:00:00Z",
+      "end": "2018-07-24T00:00:00Z",
+      "subpop": "LV",
+      "num": 600,
+      "candidates": {
+        "D": 0.48,
+        "R": 0.44
+      }
+    },
+    {
+      "pollster": "Gravis Marketing",
+      "start": "2018-06-27T00:00:00Z",
+      "end": "2018-07-02T00:00:00Z",
+      "subpop": "LV",
+      "num": 925,
+      "candidates": {
+        "D": 0.43,
+        "R": 0.39
+      }
+    },
+    {
+      "pollster": "SurveyMonkey",
+      "start": "2018-06-11T00:00:00Z",
+      "end": "2018-07-02T00:00:00Z",
+      "subpop": "LV",
+      "num": 1290,
+      "candidates": {
+        "D": 0.48,
+        "R": 0.44
+      }
+    },
+    {
+      "pollster": "Emerson College",
+      "start": "2018-06-21T00:00:00Z",
+      "end": "2018-06-22T00:00:00Z",
+      "subpop": "RV",
+      "num": 650,
+      "candidates": {
+        "D": 0.40,
+        "R": 0.32
+      }
+    },
+    {
+      "pollster": "YouGov",
+      "start": "2018-06-19T00:00:00Z",
+      "end": "2018-06-22T00:00:00Z",
+      "subpop": "LV",
+      "num": 869,
+      "candidates": {
+        "D": 0.45,
+        "R": 0.37
+      }
+    },
+    {
+      "pollster": "Marist College",
+      "start": "2018-06-17T00:00:00Z",
+      "end": "2018-06-21T00:00:00Z",
+      "subpop": "RV",
+      "num": 839,
+      "candidates": {
+        "D": 0.49,
+        "R": 0.38
+      }
+    }
+  ],
+  "CA": [],
+  "CT": [],
+  "DE": [],
+  "FL": [
+    {
+      "pollster": "Florida Atlantic University",
+      "start": "2018-08-16T00:00:00Z",
+      "end": "2018-08-20T00:00:00Z",
+      "subpop": "RV",
+      "num": 800,
+      "candidates": {
+        "D": 0.39,
+        "R": 0.45
+      }
+    },
+    {
+      "pollster": "Mason-Dixon",
+      "start": "2018-07-24T00:00:00Z",
+      "end": "2018-07-25T00:00:00Z",
+      "subpop": "LV",
+      "num": 625,
+      "candidates": {
+        "D": 0.44,
+        "R": 0.47
+      }
+    },
+    {
+      "pollster": "Florida Atlantic University",
+      "start": "2018-07-20T00:00:00Z",
+      "end": "2018-07-21T00:00:00Z",
+      "subpop": "RV",
+      "num": 800,
+      "candidates": {
+        "D": 0.40,
+        "R": 0.44
+      }
+    },
+    {
+      "pollster": "Gravis Marketing",
+      "start": "2018-07-13T00:00:00Z",
+      "end": "2018-07-14T00:00:00Z",
+      "subpop": "LV",
+      "num": 1840,
+      "candidates": {
+        "D": 0.47,
+        "R": 0.43
+      }
+    },
+    {
+      "pollster": "SurveyMonkey",
+      "start": "2018-06-11T00:00:00Z",
+      "end": "2018-07-02T00:00:00Z",
+      "subpop": "LV",
+      "num": 1080,
+      "candidates": {
+        "D": 0.46,
+        "R": 0.49
+      }
+    },
+    {
+      "pollster": "YouGov",
+      "start": "2018-06-19T00:00:00Z",
+      "end": "2018-06-22T00:00:00Z",
+      "subpop": "LV",
+      "num": 839,
+      "candidates": {
+        "D": 0.41,
+        "R": 0.46
+      }
+    },
+    {
+      "pollster": "Marist College",
+      "start": "2018-06-17T00:00:00Z",
+      "end": "2018-06-21T00:00:00Z",
+      "subpop": "RV",
+      "num": 947,
+      "candidates": {
+        "D": 0.49,
+        "R": 0.45
+      }
+    },
+    {
+      "pollster": "Public Policy Polling",
+      "start": "2018-06-17T00:00:00Z",
+      "end": "2018-06-21T00:00:00Z",
+      "subpop": "RV",
+      "num": 1308,
+      "candidates": {
+        "D": 0.48,
+        "R": 0.46
+      }
+    }
+  ],
+  "HI": [],
+  "IN": [],
+  "MA": [],
+  "MD": [],
+  "ME": [],
+  "MI": [],
+  "MN": [],
+  "MN-2": [
+    {
+      "pollster": "Marist College",
+      "start": "2018-06-15T00:00:00Z",
+      "end": "2018-06-19T00:00:00Z",
+      "subpop": "RV",
+      "num": 876,
+      "candidates": {
+        "D": 0.49,
+        "R": 0.35
+      }
+    }
+  ],
+  "MO": [],
+  "MS": [],
+  "MS-2": [],
+  "MT": [],
+  "ND": [],
+  "NE": [],
+  "NJ": [
+    {
+      "pollster": "Quinnipiac University",
+      "start": "2018-08-15T00:00:00Z",
+      "end": "2018-08-20T00:00:00Z",
+      "subpop": "RV",
+      "num": 908,
+      "candidates": {
+        "D": 0.43,
+        "R": 0.37
+      }
+    }
+  ],
+  "NM": [
+    {
+      "pollster": "Emerson College",
+      "start": "2018-08-17T00:00:00Z",
+      "end": "2018-08-18T00:00:00Z",
+      "subpop": "LV",
+      "num": 500,
+      "candidates": {
+        "D": 0.39,
+        "R": 0.21
+      }
+    }
+  ],
+  "NV": [],
+  "NY": [],
+  "OH": [],
+  "PA": [],
+  "RI": [],
+  "TN": [
+    {
+      "pollster": "Gravis Marketing",
+      "start": "2018-08-09T00:00:00Z",
+      "end": "2018-08-11T00:00:00Z",
+      "subpop": "LV",
+      "num": 620,
+      "candidates": {
+        "D": 0.44,
+        "R": 0.48
+      }
+    },
+    {
+      "pollster": "Emerson College",
+      "start": "2018-07-11T00:00:00Z",
+      "end": "2018-07-14T00:00:00Z",
+      "subpop": "RV",
+      "num": 657,
+      "candidates": {
+        "D": 0.43,
+        "R": 0.37
+      }
+    },
+    {
+      "pollster": "Public Policy Polling",
+      "start": "2018-07-10T00:00:00Z",
+      "end": "2018-07-11T00:00:00Z",
+      "subpop": "LV",
+      "num": 583,
+      "candidates": {
+        "D": 0.44,
+        "R": 0.41
+      }
+    },
+    {
+      "pollster": "SurveyMonkey",
+      "start": "2018-06-11T00:00:00Z",
+      "end": "2018-07-02T00:00:00Z",
+      "subpop": "RV",
+      "num": 1010,
+      "candidates": {
+        "D": 0.41,
+        "R": 0.55
+      }
+    },
+    {
+      "pollster": "Mason-Dixon",
+      "start": "2018-04-17T00:00:00Z",
+      "end": "2018-04-19T00:00:00Z",
+      "subpop": "RV",
+      "num": 625,
+      "candidates": {
+        "D": 0.46,
+        "R": 0.43
+      }
+    }
+  ],
+  "TX": [],
+  "UT": [],
+  "VA": [],
+  "VT": [],
+  "WA": [],
+  "WI": [
+    {
+      "pollster": "Emerson College",
+      "start": "2018-07-26T00:00:00Z",
+      "end": "2018-07-28T00:00:00Z",
+      "subpop": "RV",
+      "num": 632,
+      "candidates": {
+        "D": 0.50,
+        "R": 0.36
+      }
+    },
+    {
+      "pollster": "Marist College",
+      "start": "2018-07-15T00:00:00Z",
+      "end": "2018-07-19T00:00:00Z",
+      "subpop": "A",
+      "num": 906,
+      "candidates": {
+        "D": 0.55,
+        "R": 0.38
+      }
+    },
+    {
+      "pollster": "SurveyMonkey",
+      "start": "2018-06-11T00:00:00Z",
+      "end": "2018-07-02T00:00:00Z",
+      "subpop": "RV",
+      "num": 968,
+      "candidates": {
+        "D": 0.56,
+        "R": 0.40
+      }
+    },
+    {
+      "pollster": "Marquette University Law School",
+      "start": "2018-06-11T00:00:00Z",
+      "end": "2018-07-02T00:00:00Z",
+      "subpop": "RV",
+      "num": 800,
+      "candidates": {
+        "D": 0.49,
+        "R": 0.40
+      }
+    },
+    {
+      "pollster": "Public Policy Polling",
+      "start": "2018-03-15T00:00:00Z",
+      "end": "2018-03-16T00:00:00Z",
+      "subpop": "RV",
+      "num": 910,
+      "candidates": {
+        "D": 0.51,
+        "R": 0.39
+      }
+    }
+  ],
+  "WV": [],
+  "WY": []
+}

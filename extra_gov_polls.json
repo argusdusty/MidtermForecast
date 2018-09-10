@@ -1,0 +1,48 @@
+{
+  "AK": [
+    {
+      "pollster": "Harstad Strategic Research",
+      "start": "2018-08-16T00:00:00Z",
+      "end": "2018-08-13T00:00:00Z",
+      "subpop": "LV",
+      "num": 602,
+      "candidates": {
+        "D": 0.26,
+        "R": 0.36
+      }
+    },
+    {
+      "pollster": "Patinkin Research Strategies",
+      "start": "2018-06-28T00:00:00Z",
+      "end": "2018-06-22T00:00:00Z",
+      "subpop": "LV",
+      "num": 800,
+      "candidates": {
+        "D": 0.28,
+        "R": 0.36
+      }
+    },
+    {
+      "pollster": "Harstad Strategic Research",
+      "start": "2018-06-26T00:00:00Z",
+      "end": "2018-06-21T00:00:00Z",
+      "subpop": "LV",
+      "num": 602,
+      "candidates": {
+        "D": 0.28,
+        "R": 0.32
+      }
+    },
+    {
+      "pollster": "Alaska Survey Research",
+      "start": "2018-06-21T00:00:00Z",
+      "end": "2018-06-15T00:00:00Z",
+      "subpop": "RV",
+      "num": 654,
+      "candidates": {
+        "D": 0.23,
+        "R": 0.38
+      }
+    }
+  ]
+}

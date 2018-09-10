@@ -322,20 +322,20 @@ func forecast() {
 		defer func() { recover() }()
 		LoadForecast("senate", &senate_past)
 	}()
-	SaveForecast("forecast/senate_forecast.json", GenForecast(senate_odds, senate_raceprobs, senate_past.Past, now))
+	SaveForecast("forecast/senate_forecast.json", GenForecast(senate_odds, senate_raceprobs, senate_past, now))
 
 	var house_past Forecast
 	func() {
 		defer func() { recover() }()
 		LoadForecast("house", &house_past)
 	}()
-	SaveForecast("forecast/house_forecast.json", GenForecast(house_odds, house_raceprobs, house_past.Past, now))
+	SaveForecast("forecast/house_forecast.json", GenForecast(house_odds, house_raceprobs, house_past, now))
 	var gov_past Forecast
 	func() {
 		defer func() { recover() }()
 		LoadForecast("gov", &gov_past)
 	}()
-	SaveForecast("forecast/gov_forecast.json", GenForecast(gov_odds, gov_raceprobs, gov_past.Past, now))
+	SaveForecast("forecast/gov_forecast.json", GenForecast(gov_odds, gov_raceprobs, gov_past, now))
 }
 
 func main() {

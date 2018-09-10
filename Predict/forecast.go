@@ -197,7 +197,7 @@ func (F Forecast) GetText(name string) []string {
 	return s
 }
 
-func GenForecast(seats []float64, rp map[string]RaceProbability, past []ShortForecast, now time.Time) Forecast {
+func GenForecast(seats []float64, rp map[string]RaceProbability, past Forecast, now time.Time) Forecast {
 	var f Forecast
 	f.Date = now
 	f.RaceProbabilities = rp
@@ -222,10 +222,10 @@ func GenForecast(seats []float64, rp map[string]RaceProbability, past []ShortFor
 	}
 	for k, st := range f.RaceProbabilities {
 		st.Date = now
-		st.Past = append(st.Past, st.ShortRaceProbability)
+		st.Past = append(past.RaceProbabilities[k].Past, st.ShortRaceProbability)
 		f.RaceProbabilities[k] = st
 	}
-	f.Past = append(past, f.ShortForecast)
+	f.Past = append(past.Past, f.ShortForecast)
 	return f
 }
 

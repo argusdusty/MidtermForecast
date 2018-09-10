@@ -300,7 +300,7 @@ func forecast() {
 		gov_raceprobs[k] = v
 	}
 
-	err := os.MkdirAll("forecast", 0666)
+	err := os.MkdirAll("forecast", 0755)
 	if err != nil {
 		panic(err)
 	}

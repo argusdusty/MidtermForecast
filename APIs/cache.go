@@ -17,7 +17,7 @@ func LoadCache(url, file string, maxAge time.Duration) *bytes.Reader {
 		if err != nil {
 			panic(err)
 		}
-		os.MkdirAll(filepath.Dir(file), 0666)
+		os.MkdirAll(filepath.Dir(file), 0755)
 		f, err := os.Create(file)
 		if err != nil {
 			panic(err)

@@ -198,7 +198,7 @@ func LoadNYTLivePolls() map[string][]Poll {
 		poll.EndDate = parseTime(p["endDate"].(string))
 		poll.Subpopulation = "LV"
 		poll.Number = p["n"].(float64)
-		poll.Candidates = map[string]float64{"D": p["nDem"].(float64), "R": p["nRep"].(float64)}
+		poll.Candidates = map[string]float64{"D": p["nDem"].(float64) / poll.Number, "R": p["nRep"].(float64) / poll.Number}
 		r[seat] = append(r[seat], poll)
 	}
 	return r

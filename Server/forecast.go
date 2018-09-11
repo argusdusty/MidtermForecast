@@ -32,7 +32,10 @@ func writeForecast(w http.ResponseWriter, v interface{}, vars map[string]string)
 			WriteSeatsScript(w)
 		}
 		WriteMapScript(w)
-		WritePastScript(w)
+		if _, ok := F.RaceProbabilities["KS"]; !ok {
+			// Not Gov
+			WritePastScript(w)
+		}
 		WriteHtmlFooter(w)
 	case RaceProbability:
 		R := v.(RaceProbability)

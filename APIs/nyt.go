@@ -194,6 +194,9 @@ func LoadNYTLivePolls() map[string][]Poll {
 		}
 		poll.Pollster = "Siena College"
 		poll.URL = "https://www.nytimes.com/interactive/2018/upshot/" + p["page_id"].(string) + ".html"
+		if p["startDate"] == nil || p["endDate"] == nil {
+			continue
+		}
 		poll.StartDate = parseTime(p["startDate"].(string))
 		poll.EndDate = parseTime(p["endDate"].(string))
 		poll.Subpopulation = "LV"

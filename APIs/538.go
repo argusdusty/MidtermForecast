@@ -242,12 +242,20 @@ type Forecast538 struct {
 	//CongressPartySplits []CongressPartySplit538 `json:"congress_party_splits"`
 	//SeatChances         []SeatChance538         `json:"seat_chances"`
 	//NationalTrends      []NationalTrend538      `json:"nationalTrends"`
-	DistrictForecasts []DistrictForecast538 `json:"districtForecasts"`
+	DistrictForecasts []DistrictForecast538 `json:"districtForecasts"` // House
+	SeatForecasts     []SeatForecast538     `json:"seatForecasts"`     // Senate
 }
 
 type DistrictForecast538 struct {
 	State    string                 `json:"state"`
 	District string                 `json:"district"`
+	Forecast []CandidateForecast538 `json:"forecast"`
+	//Incumbents []Incumbent `json:"incumbent"
+}
+
+type SeatForecast538 struct {
+	State    string                 `json:"state"`
+	Class    int                    `json:"class"`
 	Forecast []CandidateForecast538 `json:"forecast"`
 	//Incumbents []Incumbent `json:"incumbent"
 }
@@ -298,11 +306,43 @@ func Load538HouseForecast() (forecast_538 map[string]float64, parties_538 map[st
 		}
 		st = get_st_dist(d.State, district)
 		parties_538[st] = map[string]string{}
-		for _, c := range d.Forecast {
-			parties_538[st][c.Candidate] = c.Party
-		}
 		voteshares := map[string]float64{}
 		for _, c := range d.Forecast {
+			parties_538[st][c.Candidate] = c.Party
+			//winProb := c.Models.Lite.WinProb*0.15 + c.Models.Classic.WinProb*0.35 + c.Models.Deluxe.WinProb*0.5
+			voteShare := c.Models.Lite.VoteShare*0.15 + c.Models.Classic.VoteShare*0.35 + c.Models.Deluxe.VoteShare*0.5
+			voteshares[c.Party] += voteShare
+		}
+		pvi := (voteshares["D"] - voteshares["R"]) / (voteshares["D"] + voteshares["R"])
+		forecast_538[st] = pvi
+	}
+	return
+}
+
+func Load538SenateForecast() (forecast_538 map[string]float64, parties_538 map[string]map[string]string) {
+	forecast_538 = map[string]float64{}
+	parties_538 = map[string]map[string]string{}
+	r := LoadCache("https://projects.fivethirtyeight.com/2018-midterm-election-forecast/senate/home.json", "cache/538_senate.json", time.Hour)
+	dec := json.NewDecoder(r)
+	var data Forecast538
+	if err := dec.Decode(&data); err != nil {
+		panic(err)
+	}
+	for _, d := range data.SeatForecasts {
+		st := d.State
+		if st == "US" {
+			continue
+		}
+		if d.Class == 2 {
+			st += "-2"
+		}
+		parties_538[st] = map[string]string{}
+		voteshares := map[string]float64{}
+		for _, c := range d.Forecast {
+			if c.Party == "I" && c.Candidate == "Bernard Sanders" || c.Candidate == "Angus S. King Jr." {
+				c.Party = "D"
+			}
+			parties_538[st][c.Candidate] = c.Party
 			//winProb := c.Models.Lite.WinProb*0.15 + c.Models.Classic.WinProb*0.35 + c.Models.Deluxe.WinProb*0.5
 			voteShare := c.Models.Lite.VoteShare*0.15 + c.Models.Classic.VoteShare*0.35 + c.Models.Deluxe.VoteShare*0.5
 			voteshares[c.Party] += voteShare

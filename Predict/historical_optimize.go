@@ -9,6 +9,7 @@ import (
 	"gonum.org/v1/gonum/mathext"
 	"gonum.org/v1/gonum/optimize"
 	"gonum.org/v1/gonum/stat/distmv"
+	"io"
 	"math"
 	"strconv"
 	"strings"
@@ -69,11 +70,13 @@ var generic_ballot_map = map[int]float64{
 }
 
 func LoadHistoricalData() (polls []map[string][]Poll, results []map[string][2]float64, electionDates []time.Time, experts_ratings [][]map[string][2]float64, incumbents []map[string]string, expert_pvis [][]map[string]float64, fundraising []map[string]float64) {
-	r := LoadCache("https://raw.githubusercontent.com/fivethirtyeight/data/master/pollster-ratings/raw-polls.csv", "cache/raw_polls.csv", -1)
-	records, err := csv.NewReader(r).ReadAll()
-	if err != nil {
-		panic(err)
-	}
+	records := LoadCache("https://raw.githubusercontent.com/fivethirtyeight/data/master/pollster-ratings/raw-polls.csv", "cache/raw_polls.csv", -1, func(r io.Reader) interface{} {
+		records, err := csv.NewReader(r).ReadAll()
+		if err != nil {
+			panic(err)
+		}
+		return records
+	}).([][]string)
 	generals := map[string]time.Time{
 		"1998": time.Date(1998, time.November, 3, 0, 0, 0, 0, time.UTC),
 		"2000": time.Date(2000, time.November, 7, 0, 0, 0, 0, time.UTC),

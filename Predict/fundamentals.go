@@ -4,6 +4,7 @@ import (
 	. "MidtermForecast/Utils"
 	"encoding/json"
 	"fmt"
+	"io"
 	"math"
 	"os"
 	"time"
@@ -45,8 +46,15 @@ func (F Fundamentals) GetText(name string) []string {
 }
 
 func LoadFundamentals(ftype string, F *RaceFundamentals) (error, time.Time) {
-	r, t := LoadFileCache("forecast/" + ftype + "_fundamentals.json")
-	return json.NewDecoder(r).Decode(F), t
+	f, t := LoadFileCache("forecast/"+ftype+"_fundamentals.json", func(r io.Reader) interface{} {
+		err := json.NewDecoder(r).Decode(F)
+		if err != nil {
+			panic(err)
+		}
+		return *F
+	})
+	*F = f.(RaceFundamentals)
+	return nil, t
 }
 
 func SaveFundamentals(name string, fundamentals RaceFundamentals) {

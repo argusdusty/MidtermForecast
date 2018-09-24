@@ -3,6 +3,7 @@ package APIs
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 )
 
 func LoadCNNHouseResults(year string) map[string][2]float64 {
@@ -10,10 +11,14 @@ func LoadCNNHouseResults(year string) map[string][2]float64 {
 	for page := 0; page < 14; page++ {
 		url := fmt.Sprintf("http://data.cnn.com/ELECTION/%s/full/H%02d.json", year, page+1)
 		cache := fmt.Sprintf("cache/CNN_%s_House_%d.json", year, page+1)
-		r := LoadCache(url, cache, -1)
-		dec := json.NewDecoder(r)
-		var data map[string]interface{}
-		dec.Decode(&data)
+		data := LoadCache(url, cache, -1, func(r io.Reader) interface{} {
+			dec := json.NewDecoder(r)
+			var data map[string]interface{}
+			if err := dec.Decode(&data); err != nil {
+				panic(err)
+			}
+			return data
+		}).(map[string]interface{})
 		for _, raw_race := range data["races"].([]interface{}) {
 			race := raw_race.(map[string]interface{})
 			raceid := race["raceid"].(string)
@@ -56,10 +61,14 @@ func LoadCNNSenateResults(year string) map[string][2]float64 {
 	results := make(map[string][2]float64)
 	url := fmt.Sprintf("http://data.cnn.com/ELECTION/%s/full/S.full.json", year)
 	cache := fmt.Sprintf("cache/CNN_%s_Senate.json", year)
-	r := LoadCache(url, cache, -1)
-	dec := json.NewDecoder(r)
-	var data map[string]interface{}
-	dec.Decode(&data)
+	data := LoadCache(url, cache, -1, func(r io.Reader) interface{} {
+		dec := json.NewDecoder(r)
+		var data map[string]interface{}
+		if err := dec.Decode(&data); err != nil {
+			panic(err)
+		}
+		return data
+	}).(map[string]interface{})
 	for _, raw_race := range data["races"].([]interface{}) {
 		race := raw_race.(map[string]interface{})
 		raceid := race["raceid"].(string)
@@ -101,10 +110,14 @@ func LoadCNNGovResults(year string) map[string][2]float64 {
 	results := make(map[string][2]float64)
 	url := fmt.Sprintf("http://data.cnn.com/ELECTION/%s/full/G.full.json", year)
 	cache := fmt.Sprintf("cache/CNN_%s_Gov.json", year)
-	r := LoadCache(url, cache, -1)
-	dec := json.NewDecoder(r)
-	var data map[string]interface{}
-	dec.Decode(&data)
+	data := LoadCache(url, cache, -1, func(r io.Reader) interface{} {
+		dec := json.NewDecoder(r)
+		var data map[string]interface{}
+		if err := dec.Decode(&data); err != nil {
+			panic(err)
+		}
+		return data
+	}).(map[string]interface{})
 	for _, raw_race := range data["races"].([]interface{}) {
 		race := raw_race.(map[string]interface{})
 		raceid := race["raceid"].(string)

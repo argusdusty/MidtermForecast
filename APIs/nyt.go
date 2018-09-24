@@ -4,6 +4,7 @@ import (
 	. "MidtermForecast/Utils"
 	"compress/zlib"
 	"encoding/json"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -21,25 +22,27 @@ func LoadNYTSenateResults(year string) map[string][2]float64 {
 	} else {
 		return nil
 	}
-	r := LoadCache(url, "cache/NYT_"+year+"_Senate.tsv", -1)
-	var s string
-	if year == "2008" {
-		zr, err := zlib.NewReader(r)
-		if err != nil {
-			panic(err)
+	s := LoadCache(url, "cache/NYT_"+year+"_Senate.tsv", -1, func(r io.Reader) interface{} {
+		if year == "2008" {
+			zr, err := zlib.NewReader(r)
+			if err != nil {
+				panic(err)
+			}
+			b, err := ioutil.ReadAll(zr)
+			if err != nil {
+				panic(err)
+			}
+			return string(b)
+		} else if year == "2010" {
+			b, err := ioutil.ReadAll(r)
+			if err != nil {
+				panic(err)
+			}
+			return string(b)
+		} else {
+			return ""
 		}
-		b, err := ioutil.ReadAll(zr)
-		if err != nil {
-			panic(err)
-		}
-		s = string(b)
-	} else if year == "2010" {
-		b, err := ioutil.ReadAll(r)
-		if err != nil {
-			panic(err)
-		}
-		s = string(b)
-	}
+	}).(string)
 	results := make(map[string][2]float64)
 	parties := make(map[string][]string)
 	var lines []string
@@ -90,25 +93,27 @@ func LoadNYTHouseResults(year string) map[string][2]float64 {
 	} else {
 		return nil
 	}
-	r := LoadCache(url, "cache/NYT_"+year+"_House.tsv", -1)
-	var s string
-	if year == "2008" {
-		zr, err := zlib.NewReader(r)
-		if err != nil {
-			panic(err)
+	s := LoadCache(url, "cache/NYT_"+year+"_House.tsv", -1, func(r io.Reader) interface{} {
+		if year == "2008" {
+			zr, err := zlib.NewReader(r)
+			if err != nil {
+				panic(err)
+			}
+			b, err := ioutil.ReadAll(zr)
+			if err != nil {
+				panic(err)
+			}
+			return string(b)
+		} else if year == "2010" {
+			b, err := ioutil.ReadAll(r)
+			if err != nil {
+				panic(err)
+			}
+			return string(b)
+		} else {
+			return ""
 		}
-		b, err := ioutil.ReadAll(zr)
-		if err != nil {
-			panic(err)
-		}
-		s = string(b)
-	} else if year == "2010" {
-		b, err := ioutil.ReadAll(r)
-		if err != nil {
-			panic(err)
-		}
-		s = string(b)
-	}
+	}).(string)
 	results := make(map[string][2]float64)
 	parties := make(map[string][]string)
 	var lines []string
@@ -184,7 +189,14 @@ func LoadNYTLivePolls() map[string][]Poll {
 	var r = make(map[string][]Poll)
 	for _, p := range data {
 		var poll Poll
-		seat := p["id"].(string)
+		var seat string
+		if s, ok := p["id"]; ok {
+			seat = s.(string)
+		} else if ds, ok := p["district_id"]; ok {
+			seat = ds.(string)
+		} else {
+			continue
+		}
 		if len(seat) == 4 {
 			if seat[2:] == "AL" {
 				// Just in case

@@ -4,6 +4,7 @@ import (
 	. "MidtermForecast/Utils"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"sort"
 	"time"
@@ -59,8 +60,15 @@ func (E Experts) GetText(name string) []string {
 }
 
 func LoadExperts(ftype string, E *RaceMapExperts) (error, time.Time) {
-	r, t := LoadFileCache("forecast/" + ftype + "_experts.json")
-	return json.NewDecoder(r).Decode(E), t
+	e, t := LoadFileCache("forecast/"+ftype+"_experts.json", func(r io.Reader) interface{} {
+		err := json.NewDecoder(r).Decode(E)
+		if err != nil {
+			panic(err)
+		}
+		return *E
+	})
+	*E = e.(RaceMapExperts)
+	return nil, t
 }
 
 func SaveExperts(name string, experts RaceMapExperts) {

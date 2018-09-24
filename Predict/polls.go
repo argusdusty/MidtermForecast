@@ -3,10 +3,12 @@ package Predict
 import (
 	. "MidtermForecast/APIs"
 	. "MidtermForecast/Utils"
+	"bytes"
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"math"
 	"os"
 	"sort"
@@ -150,8 +152,15 @@ func (P Polls) GetText(name string) []string {
 }
 
 func LoadPolls(ftype string, P *RaceMapPolls) (error, time.Time) {
-	r, t := LoadFileCache("forecast/" + ftype + "_polls.json")
-	return json.NewDecoder(r).Decode(P), t
+	p, t := LoadFileCache("forecast/"+ftype+"_polls.json", func(r io.Reader) interface{} {
+		err := json.NewDecoder(r).Decode(P)
+		if err != nil {
+			panic(err)
+		}
+		return *P
+	})
+	*P = p.(RaceMapPolls)
+	return nil, t
 }
 
 func SavePolls(name string, polls RaceMapPolls) {
@@ -166,8 +175,14 @@ func SavePolls(name string, polls RaceMapPolls) {
 }
 
 func LoadPollsWeightBias() {
-	r := LoadCache("https://raw.githubusercontent.com/fivethirtyeight/data/master/pollster-ratings/pollster-ratings.csv", "cache/pollster-ratings.csv", -1)
-	reader := csv.NewReader(r)
+	r := LoadCache("https://raw.githubusercontent.com/fivethirtyeight/data/master/pollster-ratings/pollster-ratings.csv", "cache/pollster-ratings.csv", -1, func(r io.Reader) interface{} {
+		if b, err := ioutil.ReadAll(r); err == nil {
+			return b
+		} else {
+			panic(err)
+		}
+	}).([]byte)
+	reader := csv.NewReader(bytes.NewReader(r))
 	reader.Read()
 	for {
 		record, err := reader.Read()
@@ -200,8 +215,14 @@ func LoadPollsWeightBias() {
 // Not used
 func LoadPollsWeightBiasCustom() {
 	LoadPollsWeightBias() // Initial guesses
-	r := LoadCache("https://raw.githubusercontent.com/fivethirtyeight/data/master/pollster-ratings/raw-polls.csv", "cache/raw-polls.csv", -1)
-	reader := csv.NewReader(r)
+	r := LoadCache("https://raw.githubusercontent.com/fivethirtyeight/data/master/pollster-ratings/raw-polls.csv", "cache/raw-polls.csv", -1, func(r io.Reader) interface{} {
+		if b, err := ioutil.ReadAll(r); err == nil {
+			return b
+		} else {
+			panic(err)
+		}
+	}).([]byte)
+	reader := csv.NewReader(bytes.NewReader(r))
 	reader.Read()
 	var data_map = map[string][][4]float64{} // sample_size, guess, result, bias_dir for each poll
 	var bias_map = map[string]float64{}      // Absolute sum of error per pollster

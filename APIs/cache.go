@@ -2,7 +2,6 @@ package APIs
 
 import (
 	. "MidtermForecast/Utils"
-	"bytes"
 	"io"
 	"net/http"
 	"os"
@@ -10,7 +9,7 @@ import (
 	"time"
 )
 
-func LoadCache(url, file string, maxAge time.Duration) *bytes.Reader {
+func LoadCache(url, file string, maxAge time.Duration, parser func(r io.Reader) interface{}) interface{} {
 	stat, err := os.Stat(file)
 	if err != nil || (maxAge > 0 && time.Now().Sub(stat.ModTime()) > maxAge) {
 		resp, err := http.Get(url)
@@ -26,6 +25,6 @@ func LoadCache(url, file string, maxAge time.Duration) *bytes.Reader {
 		f.Close()
 		resp.Body.Close()
 	}
-	r, _ := LoadFileCache(file)
+	r, _ := LoadFileCache(file, parser)
 	return r
 }

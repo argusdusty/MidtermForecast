@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html"
+	"io"
 	"io/ioutil"
 	"os"
 	"strconv"
@@ -54,7 +55,6 @@ func LoadCookSenateRatingsHtml(id uint64) (ratings map[string][2]float64, incumb
 			},
 			{
 				"MI": "D",
-				"MT": "D",
 				"NJ": "D",
 				"PA": "D",
 				"WI": "D",
@@ -62,22 +62,22 @@ func LoadCookSenateRatingsHtml(id uint64) (ratings map[string][2]float64, incumb
 			{
 				"MN-2": "D",
 				"OH":   "D",
+				"MT":   "D",
+				"WV":   "D",
 			},
 			{
 				"FL": "D",
 				"IN": "D",
 				"MO": "D",
 				"ND": "D",
-				"WV": "D",
 			},
 			{
 				"AZ": "O",
 				"NV": "R",
 				"TN": "O",
-			},
-			{
 				"TX": "R",
 			},
+			{},
 			{
 				"MS-2": "R",
 				"NE":   "R",
@@ -369,15 +369,16 @@ func LoadCookHouseRatingsHtml(id uint64) (ratings map[string][2]float64, incumbe
 		cache = fmt.Sprintf("cache/Cook_%d.html", id)
 		maxAge = -1
 	}
-	r := LoadCache(url, cache, maxAge)
+	data := LoadCache(url, cache, maxAge, func(r io.Reader) interface{} {
+		if rdata, err := ioutil.ReadAll(r); err == nil {
+			return string(rdata)
+		} else {
+			panic(err)
+		}
+	}).(string)
 	ratings = map[string][2]float64{}
 	incumbents = map[string]string{}
 	pvis = map[string]float64{}
-	rdata, err := ioutil.ReadAll(r)
-	if err != nil {
-		panic(err)
-	}
-	data := string(rdata)
 	for i := 0; i < 8; i++ {
 		a := strings.Index(data, "solid-seats-modal-in-title") + len("solid-seats-modal-in-title") + 2 // Start of segment
 		data = data[a:]

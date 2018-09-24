@@ -3,6 +3,7 @@ package APIs
 import (
 	"encoding/csv"
 	"fmt"
+	"io"
 	"time"
 )
 
@@ -55,11 +56,13 @@ func LoadOpenSecretsRace(mode, st string) map[string]float64 {
 			id = st[:2] + st[3:]
 		}
 	}
-	r := LoadCache(fmt.Sprintf("https://www.opensecrets.org/races/summary.csv?cycle=2018&id=%s", id), fmt.Sprintf("opensecrets_%s.csv", id), 36*time.Hour)
-	lines, err := csv.NewReader(r).ReadAll()
-	if err != nil {
-		panic(err)
-	}
+	lines := LoadCache(fmt.Sprintf("https://www.opensecrets.org/races/summary.csv?cycle=2018&id=%s", id), fmt.Sprintf("opensecrets_%s.csv", id), 36*time.Hour, func(r io.Reader) interface{} {
+		lines, err := csv.NewReader(r).ReadAll()
+		if err != nil {
+			panic(err)
+		}
+		return lines
+	}).([][]string)
 	// TODO
 	lines[0] = nil // Junk line for compiler
 	return nil

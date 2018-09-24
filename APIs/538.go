@@ -4,6 +4,7 @@ import (
 	. "MidtermForecast/Utils"
 	"encoding/json"
 	"fmt"
+	"io"
 	"strconv"
 	"strings"
 	"time"
@@ -78,12 +79,14 @@ func Load538Polls() (polls_538_senate, polls_538_house, polls_538_gov map[string
 	polls_538_senate = map[string][]Poll{}
 	polls_538_house = map[string][]Poll{}
 	polls_538_gov = map[string][]Poll{}
-	r := LoadCache("https://projects.fivethirtyeight.com/polls/polls.json", "cache/538_polls.json", time.Hour)
-	dec := json.NewDecoder(r)
-	var data []map[string]interface{}
-	if err := dec.Decode(&data); err != nil {
-		panic(err)
-	}
+	data := LoadCache("https://projects.fivethirtyeight.com/polls/polls.json", "cache/538_polls.json", time.Hour, func(r io.Reader) interface{} {
+		dec := json.NewDecoder(r)
+		var data []map[string]interface{}
+		if err := dec.Decode(&data); err != nil {
+			panic(err)
+		}
+		return data
+	}).([]map[string]interface{})
 	for _, p := range data {
 		if p["type"].(string) != "senate" && p["type"].(string) != "house" && p["type"].(string) != "governor" {
 			continue
@@ -229,10 +232,14 @@ type GenericEstimate538 struct {
 }
 
 func Load538GenericBallot() float64 {
-	r := LoadCache("https://projects.fivethirtyeight.com/congress-generic-ballot-polls/generic.json", "cache/538_generic.json", time.Hour)
-	dec := json.NewDecoder(r)
-	var v []GenericBallot538
-	dec.Decode(&v)
+	v := LoadCache("https://projects.fivethirtyeight.com/congress-generic-ballot-polls/generic.json", "cache/538_generic.json", time.Hour, func(r io.Reader) interface{} {
+		dec := json.NewDecoder(r)
+		var v []GenericBallot538
+		if err := dec.Decode(&v); err != nil {
+			panic(err)
+		}
+		return v
+	}).([]GenericBallot538)
 	dem := v[len(v)-1].Revised.DemEstimate
 	rep := v[len(v)-1].Revised.RepEstimate
 	return (dem - rep) / 100.0
@@ -284,12 +291,14 @@ type ModelForecast538 struct {
 func Load538HouseForecast() (forecast_538 map[string]float64, parties_538 map[string]map[string]string, congressional_ballot float64) {
 	forecast_538 = map[string]float64{}
 	parties_538 = map[string]map[string]string{}
-	r := LoadCache("https://projects.fivethirtyeight.com/2018-midterm-election-forecast/house/home.json", "cache/538_house.json", time.Hour)
-	dec := json.NewDecoder(r)
-	var data Forecast538
-	if err := dec.Decode(&data); err != nil {
-		panic(err)
-	}
+	data := LoadCache("https://projects.fivethirtyeight.com/2018-midterm-election-forecast/house/home.json", "cache/538_house.json", time.Hour, func(r io.Reader) interface{} {
+		dec := json.NewDecoder(r)
+		var data Forecast538
+		if err := dec.Decode(&data); err != nil {
+			panic(err)
+		}
+		return data
+	}).(Forecast538)
 	for _, d := range data.DistrictForecasts {
 		st := d.State
 		if st == "US" {
@@ -322,12 +331,14 @@ func Load538HouseForecast() (forecast_538 map[string]float64, parties_538 map[st
 func Load538SenateForecast() (forecast_538 map[string]float64, parties_538 map[string]map[string]string) {
 	forecast_538 = map[string]float64{}
 	parties_538 = map[string]map[string]string{}
-	r := LoadCache("https://projects.fivethirtyeight.com/2018-midterm-election-forecast/senate/home.json", "cache/538_senate.json", time.Hour)
-	dec := json.NewDecoder(r)
-	var data Forecast538
-	if err := dec.Decode(&data); err != nil {
-		panic(err)
-	}
+	data := LoadCache("https://projects.fivethirtyeight.com/2018-midterm-election-forecast/senate/home.json", "cache/538_senate.json", time.Hour, func(r io.Reader) interface{} {
+		dec := json.NewDecoder(r)
+		var data Forecast538
+		if err := dec.Decode(&data); err != nil {
+			panic(err)
+		}
+		return data
+	}).(Forecast538)
 	for _, d := range data.SeatForecasts {
 		st := d.State
 		if st == "US" {
@@ -354,12 +365,14 @@ func Load538SenateForecast() (forecast_538 map[string]float64, parties_538 map[s
 }
 
 func Load2016SenatePolls() map[string][]Poll {
-	r := LoadCache("https://projects.fivethirtyeight.com/2016-election-forecast/senate/updates.json", "cache/538_Senate_polls.json", -1)
-	dec := json.NewDecoder(r)
-	var data []map[string]interface{}
-	if err := dec.Decode(&data); err != nil {
-		panic(err)
-	}
+	data := LoadCache("https://projects.fivethirtyeight.com/2016-election-forecast/senate/updates.json", "cache/538_Senate_polls.json", -1, func(r io.Reader) interface{} {
+		dec := json.NewDecoder(r)
+		var data []map[string]interface{}
+		if err := dec.Decode(&data); err != nil {
+			panic(err)
+		}
+		return data
+	}).([]map[string]interface{})
 	var polls = map[string][]Poll{}
 	for _, p := range data {
 		var poll Poll

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"gonum.org/v1/gonum/mathext"
+	"io"
 	"os"
 	"sort"
 	"strings"
@@ -230,8 +231,15 @@ func GenForecast(seats []float64, rp map[string]RaceProbability, past Forecast, 
 }
 
 func LoadForecast(ftype string, F *Forecast) (error, time.Time) {
-	r, t := LoadFileCache("forecast/" + ftype + "_forecast.json")
-	return json.NewDecoder(r).Decode(F), t
+	f, t := LoadFileCache("forecast/"+ftype+"_forecast.json", func(r io.Reader) interface{} {
+		err := json.NewDecoder(r).Decode(F)
+		if err != nil {
+			panic(err)
+		}
+		return *F
+	})
+	*F = f.(Forecast)
+	return nil, t
 }
 
 func SaveForecast(name string, forecast Forecast) {

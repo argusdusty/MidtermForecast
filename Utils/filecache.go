@@ -7,6 +7,11 @@ import (
 	"time"
 )
 
+type RawObject struct {
+	Raw    []byte
+	Object interface{}
+}
+
 type FileCacheObject struct {
 	Data interface{} // Raw bytes of file
 	Time time.Time

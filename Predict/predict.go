@@ -28,11 +28,13 @@ func Prob(races map[string][2]float64, days, rw float64) ([]float64, map[string]
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			partial_race_probs := map[string]ShortRaceProbability{}
+			partial_race_probs := map[string][3]float64{}
 			c := make([]float64, num_seats)
 			t := make([]float64, num_seats)
 			for i := range worker_chan {
-				partial_race_probs = map[string]ShortRaceProbability{}
+				for k := range partial_race_probs {
+					partial_race_probs[k] = [3]float64{}
+				}
 				for j, _ := range c {
 					c[j] = 0
 					t[j] = 0
@@ -71,13 +73,7 @@ func Prob(races map[string][2]float64, days, rw float64) ([]float64, map[string]
 						ipb = mathext.RegIncBeta(alpha, beta, 0.5)
 					}
 					rp := partial_race_probs[st]
-					rp.DemWinProbability += pb
-					if rp.ConcentrationParams == nil {
-						rp.ConcentrationParams = map[string]float64{"D": 0.0, "R": 0.0}
-					}
-					rp.ConcentrationParams["D"] += alpha
-					rp.ConcentrationParams["R"] += beta
-					partial_race_probs[st] = rp
+					partial_race_probs[st] = [3]float64{rp[0] + pb, rp[1] + alpha, rp[2] + beta}
 
 					for k, x := range c {
 						if x == 0 {
@@ -95,12 +91,12 @@ func Prob(races map[string][2]float64, days, rw float64) ([]float64, map[string]
 				for st, p := range partial_race_probs {
 					rp := race_probs[st]
 					rp.Race = st
-					rp.DemWinProbability += p.DemWinProbability / float64(M)
+					rp.DemWinProbability += p[0] / float64(M)
 					if rp.ConcentrationParams == nil {
 						rp.ConcentrationParams = map[string]float64{"D": 0.0, "R": 0.0}
 					}
-					rp.ConcentrationParams["D"] += p.ConcentrationParams["D"] / float64(M)
-					rp.ConcentrationParams["R"] += p.ConcentrationParams["R"] / float64(M)
+					rp.ConcentrationParams["D"] += p[1] / float64(M)
+					rp.ConcentrationParams["R"] += p[2] / float64(M)
 					race_probs[st] = rp
 				}
 				lock.Unlock()

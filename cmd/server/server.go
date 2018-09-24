@@ -3,6 +3,7 @@ package main
 import (
 	. "MidtermForecast/Server"
 	"crypto/tls"
+	"github.com/NYTimes/gziphandler"
 	"github.com/gorilla/mux"
 	"golang.org/x/crypto/acme/autocert"
 	"net/http"
@@ -26,6 +27,7 @@ func RunAutocertServer() {
 }
 
 func FaviconHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Cache-Control", "max-age=3000")
 	http.ServeFile(w, r, "favicon.ico")
 }
 
@@ -50,16 +52,17 @@ func PastJsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func USCdsHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Cache-Control", "max-age=300")
+	w.Header().Add("Cache-Control", "max-age=3000")
 	http.ServeFile(w, r, "us-cds.json")
 }
 
 func USStatesHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Cache-Control", "max-age=300")
+	w.Header().Add("Cache-Control", "max-age=3000")
 	http.ServeFile(w, r, "us-states.json")
 }
 
 func IndexHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Cache-Control", "max-age=3000")
 	WriteHtmlHeader(w, "Forecasts", false, false, false)
 	WriteHtmlLines(w, []string{
 		"<a href=\"/senate\">Senate Forecast</a>",
@@ -91,6 +94,7 @@ func main() {
 	router.HandleFunc("/{type:(?:senate|house|gov)}.{format}", ForecastHandler)
 	router.HandleFunc("/{type:(?:senate|house|gov)}", ForecastHandler)
 	router.HandleFunc("/", IndexHandler)
-	http.Handle("/", router)
+	gzipRouter := gziphandler.GzipHandler(router)
+	http.Handle("/", gzipRouter)
 	RunAutocertServer()
 }

@@ -277,12 +277,18 @@ func forecast() {
 	senate_odds, senate_races_map := Prob(senate_races, days, 1.0)
 	senate_odds = append(append(make([]float64, 23), senate_odds...), make([]float64, 42)...) // Shift by the predetermined seats
 
+	time.Sleep(5 * time.Second)
+
 	fmt.Println("House:", len(house_races))
 	house_odds, house_races_map := Prob(house_races, days, 1.0)
+
+	time.Sleep(5 * time.Second)
 
 	fmt.Println("Gov:", len(gov_races))
 	gov_odds, gov_races_map := Prob(gov_races, days, 1.0)
 	gov_odds = append(append(make([]float64, 7), gov_odds...), make([]float64, 7)...) // Shift by the predetermined seats
+
+	time.Sleep(5 * time.Second)
 
 	senate_raceprobs := make(map[string]RaceProbability)
 	for k, v := range senate_races_map {
@@ -332,6 +338,7 @@ func forecast() {
 		LoadForecast("house", &house_past)
 	}()
 	SaveForecast("forecast/house_forecast.json", GenForecast(house_odds, house_raceprobs, house_past, now))
+
 	var gov_past Forecast
 	func() {
 		defer func() { recover() }()

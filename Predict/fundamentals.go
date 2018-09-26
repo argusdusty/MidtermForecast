@@ -14,11 +14,11 @@ import (
 
 var (
 	// Pre-computed in historical_optimize.go
-	INCUMBENT_ADVANTAGE_PVI = 0.017090794910437274 // Average margin advantage to incumbent over what PVI would expect
-	FUNDRAISING_MULTIPLIER  = 0.02356026183010312  // Gain to generic ballot per doubling of fundraising over your opponent
-	PAST_PVI_WEIGHT         = 0.2547411632557917   // Weight of previous PVI in PVI calculation
-	OVERALL_PVI_WEIGHT      = 0.2422342416886254   // Weight of generic ballot average in PVI calculation
-	FUNDAMENTALS_WEIGHT     = 25.153525945790587   // Multiplier to beta/dirichlet params for fundamentals margin in forecast. Larger means more confident
+	INCUMBENT_ADVANTAGE_PVI = 0.016976345793067837 // Average margin advantage to incumbent over what PVI would expect
+	FUNDRAISING_MULTIPLIER  = 0.02367143350492486  // Gain to generic ballot per doubling of fundraising over your opponent
+	PAST_PVI_WEIGHT         = 0.25473575624092604  // Weight of previous PVI in PVI calculation
+	OVERALL_PVI_WEIGHT      = 0.2392411256694573   // Weight of generic ballot average in PVI calculation
+	FUNDAMENTALS_WEIGHT     = 22.90325456831519    // Multiplier to beta/dirichlet params for fundamentals margin in forecast. Larger means more confident
 )
 
 type Fundamental struct {

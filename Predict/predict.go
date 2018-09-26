@@ -3,15 +3,16 @@ package Predict
 import (
 	"gonum.org/v1/gonum/mathext"
 	"math"
+	"runtime"
 	"sync"
 )
 
 var (
 	// Pre-computed in historical_optimize.go
-	RAND_NATIONAL_SHIFT  = 0.036846960837977664   // Base national error
-	DAILY_NATIONAL_SHIFT = 1.0613762863111512e-05 // Per-day average national drift
-	RAND_RACE_SHIFT      = 0.02850570598706272    // Base per-race error
-	DAILY_RACE_SHIFT     = 1.1631051195254503e-05 // Per-day per-race average drift
+	RAND_NATIONAL_SHIFT  = 0.036811891821249415   // Base national error
+	DAILY_NATIONAL_SHIFT = 1.0850935968504596e-05 // Per-day average national drift
+	RAND_RACE_SHIFT      = 0.028265923390389497   // Base per-race error
+	DAILY_RACE_SHIFT     = 1.2133332224145488e-05 // Per-day per-race average drift
 
 	N = 1 << 22 // Number of race simulations. Can go lower without much loss of accuracy, or higher if you want.
 )
@@ -24,7 +25,7 @@ func Prob(races map[string][2]float64, days, rw float64) ([]float64, map[string]
 	var lock sync.Mutex
 	race_probs := map[string]RaceProbability{}
 	worker_chan := make(chan int, N)
-	for n := 0; n < 8; n++ {
+	for n := 0; n < runtime.NumCPU(); n++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()

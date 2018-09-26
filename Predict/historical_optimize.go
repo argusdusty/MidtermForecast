@@ -463,7 +463,7 @@ func OptimizePVIs() {
 		B, rmse = lsfit(X, Y)
 		COOK_PVI_WEIGHT, PAST_PVI_WEIGHT, FUNDRAISING_MULTIPLIER, OVERALL_PVI_WEIGHT, INCUMBENT_ADVANTAGE_PVI = B[0], B[1], B[2], B[3], B[4]
 	}
-	fmt.Println("PVI weights:", COOK_PVI_WEIGHT, PAST_PVI_WEIGHT, FUNDRAISING_MULTIPLIER, OVERALL_PVI_WEIGHT, INCUMBENT_ADVANTAGE_PVI, rmse)
+	fmt.Println("Cook PVI weight:", COOK_PVI_WEIGHT, "Past PVI weight:", PAST_PVI_WEIGHT, "Fundraising PVI weight:", FUNDRAISING_MULTIPLIER, "Overall PVI weight:", OVERALL_PVI_WEIGHT, "Incumbent Advantage PVI:", INCUMBENT_ADVANTAGE_PVI, "RMSE:", rmse)
 }
 
 func addFloat64(val *float64, delta float64) {
@@ -564,7 +564,8 @@ func OptimizeSources() {
 			return -llscore
 		},
 	}
-	vals := []float64{0.749368253464103, 25.153525945790587, 301.1128810616409} // Precomputed values
+	//vals := []float64{0.749368253464103, 25.153525945790587, 301.1128810616409} // Precomputed values
+	vals := []float64{0.7995439702676344, 22.90325456831519, 302.0708670497893} // Precomputed values
 	if false {
 		// Brute-force guess-and-check
 		result, err := optimize.Minimize(prob, vals, &optimize.Settings{FuncEvaluations: 1000}, &optimize.GuessAndCheck{Rander: distmv.NewUniform([]distmv.Bound{{0.0, 10000.0}, {0.0, 10000.0}, {0.0, 10000.0}}, nil)})
@@ -574,7 +575,7 @@ func OptimizeSources() {
 		fmt.Println("Guess-And-Check Sources:", result)
 		vals = result.X
 	}
-	if false {
+	if true {
 		// Nedler-Mead optimize vals
 		result, err := optimize.Minimize(prob, vals, &optimize.Settings{FuncEvaluations: 1000}, &optimize.NelderMead{})
 		if err != nil {
@@ -586,6 +587,7 @@ func OptimizeSources() {
 	POLLING_WEIGHT = vals[0]
 	FUNDAMENTALS_WEIGHT = vals[1]
 	COOK_WEIGHT = vals[2]
+	fmt.Println("Polling weight:", vals[0], "Fundamentals weight:", vals[1], "Cook weight:", vals[2])
 }
 
 func OptimizeHistorical() {

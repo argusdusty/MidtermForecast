@@ -21,54 +21,57 @@ func LoadFECRaces(office string, year int) map[string]float64 { // Ratio of D fu
 	cache := fmt.Sprintf("cache/fec_weball%d.zip", year)
 	cacheTime := 4 * time.Hour
 	if year != 2018 {
-		cacheTime = -1
+		cacheTime = -1 // Permanently cache
 	}
-	return LoadCache(url, cache, cacheTime, func(r io.Reader) interface{} {
-		zr, err := zip.OpenReader(cache)
+	LoadCache(url, cache, cacheTime, func(r io.Reader) interface{} { return nil }) // Ensure the file is loaded onto disk
+	zr, err := zip.OpenReader(cache)
+	if err != nil {
+		panic(err)
+	}
+	for _, zf := range zr.File {
+		zfr, err := zf.Open()
 		if err != nil {
 			panic(err)
 		}
-		for _, zf := range zr.File {
-			zfr, err := zf.Open()
+		scanner := bufio.NewScanner(zfr)
+		for scanner.Scan() {
+			line := scanner.Text()
+			vals := strings.Split(line, "|") // https://www.fec.gov/campaign-finance-data/all-candidates-file-description/
+			candidate_id := vals[0]          // CAND_ID
+			party := vals[4]                 // CAND_PTY_AFFILIATION
+			raised_raw := vals[5]            // TTL_RECEIPTS
+			seat := vals[18]                 // CAND_OFFICE_ST
+			district := vals[19]             // CAND_OFFICE_DISTRICT
+			if office[0] != candidate_id[0] {
+				continue // Not matching the office ("H" or "S")
+			}
+			if office == "S" && (candidate_id == "S8MN00578" || candidate_id == "S8MN00586" || candidate_id == "S8MS00287" || candidate_id == "S4MS00120" || candidate_id == "S8MS00261") {
+				seat += "-2"
+			} else if office == "H" {
+				seat += "-" + district
+			}
+			raised, err := strconv.ParseFloat(raised_raw, 64)
 			if err != nil {
 				panic(err)
 			}
-			scanner := bufio.NewScanner(zfr)
-			for scanner.Scan() {
-				line := scanner.Text()
-				vals := strings.Split(line, "|") // https://www.fec.gov/campaign-finance-data/all-candidates-file-description/
-				candidate_id := vals[0]          // CAND_ID
-				party := vals[4]                 // CAND_PTY_AFFILIATION
-				raised_raw := vals[5]            // TTL_RECEIPTS
-				seat := vals[18]                 // CAND_OFFICE_ST
-				if office == "S" && (candidate_id == "S8MN00578" || candidate_id == "S8MN00586" || candidate_id == "S8MS00287" || candidate_id == "S4MS00120" || candidate_id == "S8MS00261") {
-					seat += "-2"
-				} else if office == "H" {
-					seat += "-" + vals[19] // CAND_OFFICE_DISTRICT
-				}
-				raised, err := strconv.ParseFloat(raised_raw, 64)
-				if err != nil {
-					panic(err)
-				}
-				if raised < 0 {
-					raised = 0
-				}
-				if party == "DEM" || party == "DFL" || (party == "IND" && (candidate_id == "S4VT00033" || candidate_id == "S2ME00109")) {
-					fundraising_totals[seat] = [2]float64{fundraising_totals[seat][0] + raised, fundraising_totals[seat][1]}
-				} else if party == "REP" || party == "GOP" {
-					fundraising_totals[seat] = [2]float64{fundraising_totals[seat][0], fundraising_totals[seat][1] + raised}
-				}
+			if raised < 0 {
+				raised = 0
 			}
-			if err := scanner.Err(); err != nil {
-				panic(err)
+			if party == "DEM" || party == "DFL" || (party == "IND" && (candidate_id == "S4VT00033" || candidate_id == "S2ME00109")) {
+				fundraising_totals[seat] = [2]float64{fundraising_totals[seat][0] + raised, fundraising_totals[seat][1]}
+			} else if party == "REP" || party == "GOP" {
+				fundraising_totals[seat] = [2]float64{fundraising_totals[seat][0], fundraising_totals[seat][1] + raised}
 			}
 		}
-		fundraising_ratios := make(map[string]float64, len(fundraising_totals))
-		for k, v := range fundraising_totals {
-			fundraising_ratios[k] = (v[0] + 10000) / (v[1] + 10000)
+		if err := scanner.Err(); err != nil {
+			panic(err)
 		}
-		return fundraising_ratios
-	}).(map[string]float64)
+	}
+	fundraising_ratios := make(map[string]float64, len(fundraising_totals))
+	for k, v := range fundraising_totals {
+		fundraising_ratios[k] = (v[0] + 10000) / (v[1] + 10000)
+	}
+	return fundraising_ratios
 }
 
 // Apparently this is missing about 30% of candidates for some fucking reason. Good job, FEC. Instead, use the bulk zip file above.

@@ -18,9 +18,9 @@ import (
 
 var (
 	// Pre-computed in historical_optimize.go
-	RAND_POLL_SHIFT  = 0.0184622107401895   // Base per-poll error
-	DAILY_POLL_SHIFT = 0.002574543816481247 // Per-day per-poll average drift
-	POLLING_WEIGHT   = 0.749368253464103    // Multiplier to beta/dirichlet params for polling average in forecast. Larger means more confident
+	RAND_POLL_SHIFT  = 0.017280740746056285  // Base per-poll error
+	DAILY_POLL_SHIFT = 0.0026921961074848465 // Per-day per-poll average drift
+	POLLING_WEIGHT   = 0.7995439702676344    // Multiplier to beta/dirichlet params for polling average in forecast. Larger means more confident
 )
 
 func init() {
@@ -211,6 +211,9 @@ func LoadPollsWeightBias() {
 		if record[9] != "" {
 			bias, err = strconv.ParseFloat(record[9][2:], 64)
 			bias /= 100.0
+			if record[9][0] == 'R' {
+				bias = -bias
+			}
 		}
 		PollsterBiases[pollster] = [2]float64{weight, bias}
 	}

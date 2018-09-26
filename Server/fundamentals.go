@@ -7,10 +7,10 @@ import (
 	"time"
 )
 
-func loadFundamentals(vars map[string]string) (interface{}, []byte, time.Time, error) {
+func loadFundamentals(vars map[string]string) (interface{}, time.Time, error) {
 	var F RaceFundamentals
-	raw, err, modtime := LoadFundamentals(vars["type"], &F)
-	return F[vars["race"]], raw, modtime, err
+	err, modtime := LoadFundamentals(vars["type"], &F)
+	return F[vars["race"]], modtime, err
 }
 
 func writeFundamentals(w http.ResponseWriter, v interface{}, vars map[string]string) {

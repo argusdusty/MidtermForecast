@@ -2,11 +2,9 @@ package Predict
 
 import (
 	. "MidtermForecast/Utils"
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"math"
 	"os"
 	"time"
@@ -47,20 +45,16 @@ func (F Fundamentals) GetText(name string) []string {
 	return s
 }
 
-func LoadFundamentals(ftype string, F *RaceFundamentals) ([]byte, error, time.Time) {
+func LoadFundamentals(ftype string, F *RaceFundamentals) (error, time.Time) {
 	f, t := LoadFileCache("forecast/"+ftype+"_fundamentals.json", func(r io.Reader) interface{} {
-		data, err := ioutil.ReadAll(r)
+		err := json.NewDecoder(r).Decode(F)
 		if err != nil {
 			panic(err)
 		}
-		err = json.NewDecoder(bytes.NewReader(data)).Decode(F)
-		if err != nil {
-			panic(err)
-		}
-		return RawObject{Raw: data, Object: *F}
+		return *F
 	})
-	*F = f.(RawObject).Object.(RaceFundamentals)
-	return f.(RawObject).Raw, nil, t
+	*F = f.(RaceFundamentals)
+	return nil, t
 }
 
 func SaveFundamentals(name string, fundamentals RaceFundamentals) {

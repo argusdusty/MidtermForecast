@@ -1,6 +1,7 @@
 package Server
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
@@ -14,7 +15,7 @@ func init() {
 	start_time = time.Now()
 }
 
-func ValueHandler(w http.ResponseWriter, r *http.Request, name string, loadValue func(map[string]string) (interface{}, []byte, time.Time, error), writeValue func(http.ResponseWriter, interface{}, map[string]string)) {
+func ValueHandler(w http.ResponseWriter, r *http.Request, name string, loadValue func(map[string]string) (interface{}, time.Time, error), writeValue func(http.ResponseWriter, interface{}, map[string]string)) {
 	defer func() {
 		if r := recover(); r != nil {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -23,7 +24,7 @@ func ValueHandler(w http.ResponseWriter, r *http.Request, name string, loadValue
 		}
 	}()
 	vars := mux.Vars(r)
-	v, vJson, modtime, err := loadValue(vars)
+	v, modtime, err := loadValue(vars)
 	if os.IsNotExist(err) || v == nil {
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte("404 page not found"))
@@ -52,7 +53,7 @@ func ValueHandler(w http.ResponseWriter, r *http.Request, name string, loadValue
 	case "json":
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Write(vJson)
+		json.NewEncoder(w).Encode(v)
 	default:
 		writeValue(w, v, vars)
 	}

@@ -151,20 +151,16 @@ func (P Polls) GetText(name string) []string {
 	return s
 }
 
-func LoadPolls(ftype string, P *RaceMapPolls) ([]byte, error, time.Time) {
+func LoadPolls(ftype string, P *RaceMapPolls) (error, time.Time) {
 	p, t := LoadFileCache("forecast/"+ftype+"_polls.json", func(r io.Reader) interface{} {
-		data, err := ioutil.ReadAll(r)
+		err := json.NewDecoder(r).Decode(P)
 		if err != nil {
 			panic(err)
 		}
-		err = json.NewDecoder(bytes.NewReader(data)).Decode(P)
-		if err != nil {
-			panic(err)
-		}
-		return RawObject{Raw: data, Object: *P}
+		return *P
 	})
-	*P = p.(RawObject).Object.(RaceMapPolls)
-	return p.(RawObject).Raw, nil, t
+	*P = p.(RaceMapPolls)
+	return nil, t
 }
 
 func SavePolls(name string, polls RaceMapPolls) {

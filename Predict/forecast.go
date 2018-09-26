@@ -2,12 +2,10 @@ package Predict
 
 import (
 	. "MidtermForecast/Utils"
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"gonum.org/v1/gonum/mathext"
 	"io"
-	"io/ioutil"
 	"os"
 	"sort"
 	"strings"
@@ -42,7 +40,7 @@ type RaceProbability struct {
 	ShortRaceProbability
 	Race    string                 `json:"race"`
 	Sources map[string][2]float64  `json:"sources"`
-	Past    []ShortRaceProbability `json:"past"`
+	Past    []ShortRaceProbability `json:"past,omitempty"`
 }
 
 type SeatProbability struct {
@@ -232,20 +230,16 @@ func GenForecast(seats []float64, rp map[string]RaceProbability, past Forecast, 
 	return f
 }
 
-func LoadForecast(ftype string, F *Forecast) ([]byte, error, time.Time) {
+func LoadForecast(ftype string, F *Forecast) (error, time.Time) {
 	f, t := LoadFileCache("forecast/"+ftype+"_forecast.json", func(r io.Reader) interface{} {
-		data, err := ioutil.ReadAll(r)
+		err := json.NewDecoder(r).Decode(F)
 		if err != nil {
 			panic(err)
 		}
-		err = json.NewDecoder(bytes.NewReader(data)).Decode(F)
-		if err != nil {
-			panic(err)
-		}
-		return RawObject{Raw: data, Object: *F}
+		return *F
 	})
-	*F = f.(RawObject).Object.(Forecast)
-	return f.(RawObject).Raw, nil, t
+	*F = f.(Forecast)
+	return nil, t
 }
 
 func SaveForecast(name string, forecast Forecast) {

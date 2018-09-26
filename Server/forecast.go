@@ -2,25 +2,26 @@ package Server
 
 import (
 	. "MidtermForecast/Predict"
-	"encoding/json"
 	"net/http"
 	"strings"
 	"time"
 )
 
-func loadForecast(vars map[string]string) (interface{}, []byte, time.Time, error) {
+func loadForecast(vars map[string]string) (interface{}, time.Time, error) {
 	var F Forecast
-	raw, err, modtime := LoadForecast(vars["type"], &F)
+	err, modtime := LoadForecast(vars["type"], &F)
 	if vars["race"] != "" {
 		for _, r := range F.RaceProbabilities {
 			if r.Race == vars["race"] {
-				var b []byte
-				b, err = json.Marshal(r)
-				return r, b, modtime, err
+				return r, modtime, err
 			}
 		}
 	}
-	return F, raw, modtime, err
+	for k, v := range F.RaceProbabilities {
+		v.Past = nil // Not needed, takes up large amount of space/mem/network
+		F.RaceProbabilities[k] = v
+	}
+	return F, modtime, err
 }
 
 func writeForecast(w http.ResponseWriter, v interface{}, vars map[string]string) {

@@ -3,21 +3,18 @@ package Server
 import (
 	. "MidtermForecast/Predict"
 	. "MidtermForecast/Utils"
-	"encoding/json"
 	"net/http"
 	"strings"
 	"time"
 )
 
-func loadPolls(vars map[string]string) (interface{}, []byte, time.Time, error) {
+func loadPolls(vars map[string]string) (interface{}, time.Time, error) {
 	var P RaceMapPolls
-	raw, err, modtime := LoadPolls(vars["type"], &P)
+	err, modtime := LoadPolls(vars["type"], &P)
 	if vars["race"] != "" {
-		var b []byte
-		b, err = json.Marshal(P[vars["race"]])
-		return P[vars["race"]], b, modtime, err
+		return P[vars["race"]], modtime, err
 	}
-	return P, raw, modtime, err
+	return P, modtime, err
 }
 
 func writePolls(w http.ResponseWriter, v interface{}, vars map[string]string) {

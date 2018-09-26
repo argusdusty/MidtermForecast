@@ -2,11 +2,9 @@ package Predict
 
 import (
 	. "MidtermForecast/Utils"
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"sort"
 	"time"
@@ -61,20 +59,16 @@ func (E Experts) GetText(name string) []string {
 	return s
 }
 
-func LoadExperts(ftype string, E *RaceMapExperts) ([]byte, error, time.Time) {
+func LoadExperts(ftype string, E *RaceMapExperts) (error, time.Time) {
 	e, t := LoadFileCache("forecast/"+ftype+"_experts.json", func(r io.Reader) interface{} {
-		data, err := ioutil.ReadAll(r)
+		err := json.NewDecoder(r).Decode(E)
 		if err != nil {
 			panic(err)
 		}
-		err = json.NewDecoder(bytes.NewReader(data)).Decode(E)
-		if err != nil {
-			panic(err)
-		}
-		return RawObject{Raw: data, Object: *E}
+		return *E
 	})
-	*E = e.(RawObject).Object.(RaceMapExperts)
-	return e.(RawObject).Raw, nil, t
+	*E = e.(RaceMapExperts)
+	return nil, t
 }
 
 func SaveExperts(name string, experts RaceMapExperts) {

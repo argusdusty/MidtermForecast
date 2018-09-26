@@ -7,10 +7,10 @@ import (
 	"time"
 )
 
-func loadExperts(vars map[string]string) (interface{}, []byte, time.Time, error) {
+func loadExperts(vars map[string]string) (interface{}, time.Time, error) {
 	var E RaceMapExperts
-	raw, err, modtime := LoadExperts(vars["type"], &E)
-	return E[vars["race"]], raw, modtime, err
+	err, modtime := LoadExperts(vars["type"], &E)
+	return E[vars["race"]], modtime, err
 }
 
 func writeExperts(w http.ResponseWriter, v interface{}, vars map[string]string) {

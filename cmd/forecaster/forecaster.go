@@ -75,6 +75,9 @@ var (
 	house_fundamentals  RaceFundamentals
 	senate_fundamentals RaceFundamentals
 	gov_fundamentals    RaceFundamentals
+
+	house_nyt_polls  map[string][]Poll
+	senate_nyt_polls map[string][]Poll
 )
 
 type District struct {
@@ -133,6 +136,8 @@ func setup() {
 
 	fundraising_senate_ratios = LoadFECRaces("S", 2018)
 	fundraising_house_ratios = LoadFECRaces("H", 2018)
+
+	house_nyt_polls, senate_nyt_polls = LoadNYTLivePolls()
 }
 
 func merge_senate_classes(now time.Time) (map[string][2]float64, map[string]map[string][2]float64) {
@@ -154,7 +159,7 @@ func merge_senate_classes(now time.Time) (map[string][2]float64, map[string]map[
 	var extra_polls map[string][]Poll
 	dec := json.NewDecoder(f)
 	dec.Decode(&extra_polls)
-	polling_data := []map[string][]Poll{polling_data_538, extra_polls}
+	polling_data := []map[string][]Poll{polling_data_538, extra_polls, senate_nyt_polls}
 
 	pvi_estimates := []map[string]float64{cook_pvis, past_senate_pvi}
 	pvi_weights := []float64{COOK_PVI_WEIGHT, PAST_PVI_WEIGHT}
@@ -202,7 +207,7 @@ func merge_house_classes(now time.Time) (map[string][2]float64, map[string]map[s
 	var extra_polls map[string][]Poll
 	dec = json.NewDecoder(f)
 	dec.Decode(&extra_polls)
-	polling_data := []map[string][]Poll{polling_data_538, extra_polls, LoadNYTLivePolls()}
+	polling_data := []map[string][]Poll{polling_data_538, extra_polls, house_nyt_polls}
 
 	pvi_estimates_dist := make(map[string]float64, len(districts))
 	for _, d := range districts {

@@ -176,7 +176,7 @@ func parseTime(value string) time.Time {
 
 // Load ongoing polls from https://www.nytimes.com/interactive/2018/upshot/elections-polls.html
 // Partial data is better than no data
-func LoadNYTLivePolls() map[string][]Poll {
+func LoadNYTLivePolls() (housePolls, senatePolls map[string][]Poll) {
 	resp, err := http.Get("https://int.nyt.com/newsgraphics/2018/live-polls-2018/all-races.json")
 	if err != nil {
 		panic(err)
@@ -186,7 +186,8 @@ func LoadNYTLivePolls() map[string][]Poll {
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		panic(err)
 	}
-	var r = make(map[string][]Poll)
+	housePolls = make(map[string][]Poll)
+	senatePolls = make(map[string][]Poll)
 	for _, p := range data {
 		var poll Poll
 		var seat string
@@ -204,6 +205,11 @@ func LoadNYTLivePolls() map[string][]Poll {
 			}
 			seat = seat[:2] + "-" + seat[2:]
 		}
+		var senate bool = false
+		if strings.Contains(p["name"].(string), "Senate") {
+			seat = seat[:2]
+			senate = true
+		}
 		poll.Pollster = "Siena College"
 		poll.URL = "https://www.nytimes.com/interactive/2018/upshot/" + p["page_id"].(string) + ".html"
 		if p["startDate"] == nil || p["endDate"] == nil {
@@ -214,7 +220,11 @@ func LoadNYTLivePolls() map[string][]Poll {
 		poll.Subpopulation = "LV"
 		poll.Number = p["n"].(float64)
 		poll.Candidates = map[string]float64{"D": p["nDem"].(float64) / poll.Number, "R": p["nRep"].(float64) / poll.Number}
-		r[seat] = append(r[seat], poll)
+		if senate {
+			senatePolls[seat] = append(senatePolls[seat], poll)
+		} else {
+			housePolls[seat] = append(housePolls[seat], poll)
+		}
 	}
-	return r
+	return
 }

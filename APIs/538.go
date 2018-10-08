@@ -104,7 +104,10 @@ func Load538Polls() (polls_538_senate, polls_538_house, polls_538_gov map[string
 			panic(err)
 		}
 		poll.EndDate = end
-		poll.Subpopulation = strings.ToUpper(p["population"].(string))
+		poll.Subpopulation = "A"
+		if p["population"] != nil {
+			poll.Subpopulation = strings.ToUpper(p["population"].(string))
+		}
 		if p["sampleSize"] == nil {
 			continue
 		}

@@ -57,7 +57,7 @@ func GetPollWeights(polls []Poll, parties map[string]string, electionDate time.T
 		}
 		err += math.Abs(serr)
 
-		w *= math.Pow(err, -2.0) / poll.Number
+		w *= math.Pow(err, -2.0)
 
 		// Get subpopulation weight (LV best)
 		switch poll.Subpopulation {

@@ -1,12 +1,14 @@
 package main
 
 import (
+	. "MidtermForecast/Predict"
 	. "MidtermForecast/Server"
 	"crypto/tls"
 	"github.com/NYTimes/gziphandler"
 	"github.com/gorilla/mux"
 	"golang.org/x/crypto/acme/autocert"
 	"net/http"
+	"time"
 )
 
 func RunAutocertServer() {
@@ -72,7 +74,18 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	WriteHtmlFooter(w)
 }
 
+func refreshFiles() {
+	// Keep a handful of large files fresh in the cache
+	var houseForecast, senateForecast, govForecast Forecast
+	for range time.Tick(30 * time.Second) {
+		LoadForecast("house", &houseForecast)
+		LoadForecast("senate", &senateForecast)
+		LoadForecast("gov", &govForecast)
+	}
+}
+
 func main() {
+	go refreshFiles()
 	router := mux.NewRouter().StrictSlash(true).Host("{subdomain}.{domain}.{tld}").Subrouter()
 	router.HandleFunc("/favicon.ico", FaviconHandler)
 	router.HandleFunc("/forecast.js", ForecastJsHandler)

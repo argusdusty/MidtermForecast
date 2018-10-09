@@ -63,6 +63,10 @@ var (
 		"Wisconsin":      "WI",
 		"Wyoming":        "WY",
 	}
+	pollsterAliases = map[string]string{
+		"Siena College/New York Times": "Siena College",
+		"CNN/SRSS":                     "SRSS",
+	}
 )
 
 func get_st_dist(st string, dist int64) string {
@@ -93,6 +97,9 @@ func Load538Polls() (polls_538_senate, polls_538_house, polls_538_gov map[string
 		}
 		var poll Poll
 		poll.Pollster = p["pollster"].(string)
+		if p, ok := pollsterAliases[poll.Pollster]; ok {
+			poll.Pollster = p
+		}
 		start, err := time.Parse("2006-01-02", p["startDate"].(string))
 		if err != nil {
 			panic(err)
@@ -380,6 +387,9 @@ func Load2016SenatePolls() map[string][]Poll {
 	for _, p := range data {
 		var poll Poll
 		poll.Pollster = p["pollster"].(string)
+		if p, ok := pollsterAliases[poll.Pollster]; ok {
+			poll.Pollster = p
+		}
 		start, err := time.Parse("2006-01-02", p["startDate"].(string))
 		if err != nil {
 			panic(err)

@@ -17,10 +17,12 @@ func loadForecast(vars map[string]string) (interface{}, time.Time, error) {
 			}
 		}
 	}
+	raceProbs := make(map[string]RaceProbability, len(F.RaceProbabilities))
 	for k, v := range F.RaceProbabilities {
 		v.Past = nil // Not needed, takes up large amount of space/mem/network
-		F.RaceProbabilities[k] = v
+		raceProbs[k] = v
 	}
+	F.RaceProbabilities = raceProbs
 	return F, modtime, err
 }
 

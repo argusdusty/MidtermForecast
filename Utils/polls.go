@@ -43,25 +43,27 @@ func (A Poll) Compare(B Poll) bool {
 		} else if PollsterBiases[A.Pollster][0] < PollsterBiases[B.Pollster][0] {
 			return false
 		}
-		// Compare subpopulation quality
-		if A.Subpopulation != B.Subpopulation {
-			switch A.Subpopulation {
-			case "LV":
+	}
+	// Compare subpopulation quality
+	if A.Subpopulation != B.Subpopulation {
+		switch A.Subpopulation {
+		case "LV":
+			return true
+		case "RV":
+			if B.Subpopulation == "LV" {
+				return false
+			}
+			return true
+		case "A", "V":
+			if B.Subpopulation == "LV" || B.Subpopulation == "RV" {
+				return false
+			}
+			if !(B.Subpopulation == "A" || B.Subpopulation == "V") {
 				return true
-			case "RV":
-				if B.Subpopulation == "LV" {
-					return false
-				}
-				return true
-			case "A", "V":
-				if B.Subpopulation == "LV" || B.Subpopulation == "RV" {
-					return false
-				}
-				if !(B.Subpopulation == "A" || B.Subpopulation == "V") {
-					return true
-				}
 			}
 		}
+	}
+	if A.Pollster != B.Pollster {
 		// Compare pollster names
 		if A.Pollster < B.Pollster {
 			return true

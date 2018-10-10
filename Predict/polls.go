@@ -27,7 +27,7 @@ func init() {
 	LoadPollsWeightBias()
 }
 
-func GetPollWeights(polls []Poll, parties map[string]string, electionDate time.Time) []float64 {
+func GetPollWeights(polls []Poll, parties map[string]string, electionDate time.Time, divUsed bool) []float64 {
 	used := map[string]int{}
 	for _, poll := range polls {
 		used[poll.Pollster]++
@@ -38,7 +38,9 @@ func GetPollWeights(polls []Poll, parties map[string]string, electionDate time.T
 		if wb, ok := PollsterBiases[poll.Pollster]; ok {
 			w = wb[0]
 		}
-		w /= float64(used[poll.Pollster])
+		if divUsed {
+			w /= float64(used[poll.Pollster])
+		}
 
 		// Expected error
 		err := math.Pow(poll.Number, -0.5)
@@ -127,7 +129,7 @@ func (P RacePolls) GetText(name string) []string {
 
 func (P Polls) GetText(name string) []string {
 	sort.Sort(P)
-	weights := GetPollWeights(P, map[string]string{"D": "D", "R": "R"}, time.Date(2018, 11, 7, 0, 0, 0, 0, time.UTC))
+	weights := GetPollWeights(P, map[string]string{"D": "D", "R": "R"}, time.Date(2018, 11, 7, 0, 0, 0, 0, time.UTC), true)
 	var sw float64
 	for _, w := range weights {
 		sw += w
@@ -376,28 +378,55 @@ func GetConcentrationParams(polls []Poll, parties map[string]string, electionDat
 	return c_scores
 }
 
+func MergePolls(A, B []Poll) []Poll {
+	aw := GetPollWeights(A, map[string]string{"D": "D", "R": "R"}, time.Date(2018, 11, 7, 0, 0, 0, 0, time.UTC), false)
+	bw := GetPollWeights(B, map[string]string{"D": "D", "R": "R"}, time.Date(2018, 11, 7, 0, 0, 0, 0, time.UTC), false)
+	useda := make([]bool, len(A))
+	usedb := make([]bool, len(B))
+	C := make([]Poll, 0)
+	for i, a := range A {
+		for j, b := range B {
+			if usedb[j] {
+				continue
+			}
+			d := a.EndDate.Sub(b.EndDate)
+			if d < 0 {
+				d = -d
+			}
+			if a.Pollster == b.Pollster && d < 48*time.Hour {
+				// Close enough together, probably the same poll, pick the one with the larger weight.
+				useda[i] = true // Mark both polls as used and only append 1
+				usedb[j] = true
+				if aw[i] > bw[j] {
+					C = append(C, a)
+				} else {
+					// Prioritize the *second* source if they're equal
+					C = append(C, b)
+				}
+			}
+		}
+	}
+	// Now insert the unused polls
+	for i, a := range A {
+		if !useda[i] {
+			C = append(C, a)
+		}
+	}
+	for j, b := range B {
+		if !usedb[j] {
+			C = append(C, b)
+		}
+	}
+	sort.Sort(Polls(C))
+	return C
+}
+
 func CombinePolls(polling_data []map[string][]Poll) map[string][]Poll {
 	polls := make(map[string][]Poll)
 	for _, poll := range polling_data {
 		for k, v := range poll {
-			if _, ok := polls[k]; !ok {
-				polls[k] = v
-			} else {
-				for _, p := range v {
-					f := false
-					for _, p2 := range polls[k] {
-						if p.Pollster == p2.Pollster {
-							if (p.EndDate.After(p2.EndDate) && p.EndDate.Sub(p2.EndDate) < 48*time.Hour) || (p2.EndDate.After(p.EndDate) && p2.EndDate.Sub(p.EndDate) < 48*time.Hour) {
-								f = true
-								break
-							}
-						}
-					}
-					if !f {
-						polls[k] = append(polls[k], p)
-					}
-				}
-			}
+			// Consider merging v with itself to remove internal dups
+			polls[k] = MergePolls(polls[k], v)
 		}
 	}
 	return polls

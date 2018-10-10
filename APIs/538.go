@@ -65,7 +65,7 @@ var (
 	}
 	pollsterAliases = map[string]string{
 		"Siena College/New York Times": "Siena College",
-		"CNN/SRSS":                     "SRSS",
+		"CNN/SSRS":                     "SSRS",
 	}
 )
 

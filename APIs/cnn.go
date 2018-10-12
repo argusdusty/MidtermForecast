@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -236,7 +237,7 @@ type CNNForecastSeat struct {
 }
 
 func LoadCNNSenateForecast() map[string]float64 {
-	data := LoadCache("https://data.cnn.com/interactive/2018/stage/house/overview.json", "CNN_house_forecast.json", time.Hour, func(r io.Reader) interface{} {
+	data := LoadCache("https://data.cnn.com/interactive/2018/stage/senate/overview.json", "cache/CNN_senate_forecast.json", time.Hour, func(r io.Reader) interface{} {
 		dec := json.NewDecoder(r)
 		var data CNNForecast
 		if err := dec.Decode(&data); err != nil {
@@ -247,13 +248,17 @@ func LoadCNNSenateForecast() map[string]float64 {
 	r := make(map[string]float64, len(data.Seats))
 	for _, district := range data.Seats {
 		st := USStateAbbrev[district.Seat]
+		if strings.HasSuffix(district.Seat, " (Special)") {
+			st = USStateAbbrev[district.Seat[:len(district.Seat)-10]] + "-2"
+		}
 		r[st] = district.Prediction / 100.0
 	}
+	fmt.Println(r)
 	return r
 }
 
 func LoadCNNHouseForecast() map[string]float64 {
-	data := LoadCache("https://data.cnn.com/interactive/2018/stage/house/overview.json", "CNN_house_forecast.json", time.Hour, func(r io.Reader) interface{} {
+	data := LoadCache("https://data.cnn.com/interactive/2018/stage/house/overview.json", "cache/CNN_house_forecast.json", time.Hour, func(r io.Reader) interface{} {
 		dec := json.NewDecoder(r)
 		var data CNNForecast
 		if err := dec.Decode(&data); err != nil {

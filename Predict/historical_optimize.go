@@ -69,7 +69,7 @@ var generic_ballot_map = map[int]float64{
 	2016: float64(61776554-63173815) / float64(61776554+63173815),
 }
 
-func LoadHistoricalData() (polls []map[string][]Poll, results []map[string][2]float64, electionDates []time.Time, experts_ratings [][]map[string][2]float64, incumbents []map[string]string, expert_pvis [][]map[string]float64, fundraising []map[string]float64) {
+func LoadHistoricalData() (polls []map[string][]Poll, results []map[string][2]float64, electionDates []time.Time, experts_ratings [][]map[string][2]float64, incumbents []map[string]string, expert_pvis [][]map[string]float64, fundraising []map[string]float64, elasticities []map[string]float64) {
 	records := LoadCache("https://raw.githubusercontent.com/fivethirtyeight/data/master/pollster-ratings/raw-polls.csv", "cache/raw_polls.csv", -1, func(r io.Reader) interface{} {
 		records, err := csv.NewReader(r).ReadAll()
 		if err != nil {
@@ -95,6 +95,7 @@ func LoadHistoricalData() (polls []map[string][]Poll, results []map[string][2]fl
 	incumbents = []map[string]string{}
 	expert_pvis = [][]map[string]float64{}
 	fundraising = []map[string]float64{}
+	elasticities = []map[string]float64{}
 	// Only do Senate/House/Gov 2012/2014/2016 for now because those are all I can get proper historical data for
 	for _, year := range []string{ /*"1998", "2000", "2002", "2004", "2006", "2008", "2010", */ "2012", "2014", "2016"} {
 		date := generals[year]
@@ -123,6 +124,7 @@ func LoadHistoricalData() (polls []map[string][]Poll, results []map[string][2]fl
 					f = false
 				}
 				fundraising = append(fundraising, LoadFECRaces("H", generals[year].Year()))
+				elasticities = append(elasticities, Load538HouseElasticities())
 			} else if r == "Sen-G" {
 				if year == "2008" {
 					crats, cincs, cpvis = LoadCookSenateRatingsHtml(139080) // Will give wrong PVIs because Cook gives PVIs of current districts even for historical
@@ -136,6 +138,7 @@ func LoadHistoricalData() (polls []map[string][]Poll, results []map[string][2]fl
 					f = false
 				}
 				fundraising = append(fundraising, LoadFECRaces("S", generals[year].Year()))
+				elasticities = append(elasticities, Load538SenateElasticities())
 			} else if r == "Gov-G" {
 				if year == "2008" {
 					crats, cincs, cpvis = LoadCookGovRatingsHtml(139082) // Will give wrong PVIs because Cook gives PVIs of current districts even for historical
@@ -149,9 +152,11 @@ func LoadHistoricalData() (polls []map[string][]Poll, results []map[string][2]fl
 					f = false
 				}
 				fundraising = append(fundraising, nil)
+				elasticities = append(elasticities, Load538SenateElasticities())
 			} else {
 				f = false
 				fundraising = append(fundraising, nil)
+				elasticities = append(elasticities, Load538SenateElasticities())
 			}
 			if f {
 				experts_ratings = append(experts_ratings, []map[string][2]float64{crats})
@@ -260,7 +265,7 @@ func LoadHistoricalData() (polls []map[string][]Poll, results []map[string][2]fl
 		polls[idx] = Load2016SenatePolls()
 		results[idx] = Senate2016results
 	}
-	return polls, results, electionDates, experts_ratings, incumbents, expert_pvis, fundraising
+	return polls, results, electionDates, experts_ratings, incumbents, expert_pvis, fundraising, elasticities
 }
 
 func linfit(X, Y []float64) (a, b, rmse float64) {
@@ -297,7 +302,7 @@ func getPollingErr(polls []Poll, result [2]float64, electionDate, now time.Time)
 }
 
 func OptimizePollShift() {
-	stpolls, results, dates, _, _, _, _ := LoadHistoricalData()
+	stpolls, results, dates, _, _, _, _, _ := LoadHistoricalData()
 	errs := make([]float64, 0)
 	days := make([]float64, 0)
 	for idx, stpoll := range stpolls {
@@ -322,7 +327,7 @@ func OptimizePollShift() {
 }
 
 func OptimizeNationalShift() {
-	stpolls, results, dates, _, _, _, _ := LoadHistoricalData()
+	stpolls, results, dates, _, _, _, _, _ := LoadHistoricalData()
 
 	ntnldays := make([]float64, 0)
 	ntnlerrs := make([]float64, 0)
@@ -357,7 +362,7 @@ func OptimizeNationalShift() {
 }
 
 func OptimizeRaceShift() {
-	stpolls, results, dates, _, _, _, _ := LoadHistoricalData()
+	stpolls, results, dates, _, _, _, _, _ := LoadHistoricalData()
 
 	racedays := make([]float64, 0)
 	raceerrs := make([]float64, 0)
@@ -408,7 +413,7 @@ func lsfit(X [][]float64, Y []float64) (B []float64, rmse float64) {
 }
 
 func OptimizePVIs() {
-	_, results, dates, _, incumbents, expert_pvis, fundraising := LoadHistoricalData()
+	_, results, dates, _, incumbents, expert_pvis, fundraising, elasticities := LoadHistoricalData()
 	// Linear fit: cook_pvi*COOK_PVI_WEIGHT+past_pvi*PAST_PVI_WEIGHT+log_fundraising_ratio*FUNDRAISING_MULTIPLIER+overall_pvi*OVERALL_PVI_WEIGHT+incumbent_advantange*INCUMBENT_ADVANTAGE_PVI = d_margin
 	var rmse float64
 	for t := 0; t < 10; t++ {
@@ -455,7 +460,11 @@ func OptimizePVIs() {
 				if r[0] == 0 || r[1] == 0 {
 					continue
 				}
-				X = append(X, []float64{cook_pvis[k], past_pvis[k], log_fundraising_ratios[k], generic_ballot, incumbent[k]})
+				elasticity := elasticities[idx][k]
+				if elasticity == 0.0 {
+					elasticity = 1.0
+				}
+				X = append(X, []float64{cook_pvis[k], past_pvis[k], log_fundraising_ratios[k], generic_ballot * elasticity, incumbent[k]})
 				Y = append(Y, (r[0]-r[1])/(r[0]+r[1]))
 			}
 		}
@@ -463,7 +472,7 @@ func OptimizePVIs() {
 		B, rmse = lsfit(X, Y)
 		COOK_PVI_WEIGHT, PAST_PVI_WEIGHT, FUNDRAISING_MULTIPLIER, OVERALL_PVI_WEIGHT, INCUMBENT_ADVANTAGE_PVI = B[0], B[1], B[2], B[3], B[4]
 	}
-	fmt.Println("Cook PVI weight:", COOK_PVI_WEIGHT, "Past PVI weight:", PAST_PVI_WEIGHT, "Fundraising PVI weight:", FUNDRAISING_MULTIPLIER, "Overall PVI weight:", OVERALL_PVI_WEIGHT, "Incumbent Advantage PVI:", INCUMBENT_ADVANTAGE_PVI, "RMSE:", rmse)
+	fmt.Println("Cook PVI weight:", COOK_PVI_WEIGHT, "Past PVI weight:", PAST_PVI_WEIGHT, "Fundraising multiplier:", FUNDRAISING_MULTIPLIER, "Overall PVI weight:", OVERALL_PVI_WEIGHT, "Incumbent Advantage PVI:", INCUMBENT_ADVANTAGE_PVI, "RMSE:", rmse)
 }
 
 func addFloat64(val *float64, delta float64) {
@@ -481,7 +490,7 @@ func addFloat64(val *float64, delta float64) {
 }
 
 func OptimizeSources() {
-	stpolls, results, dates, expert_ratings, incumbents, expert_pvis, fundraising := LoadHistoricalData()
+	stpolls, results, dates, expert_ratings, incumbents, expert_pvis, fundraising, elasticities := LoadHistoricalData()
 	prob := optimize.Problem{
 		Func: func(vals []float64) float64 {
 			POLLING_WEIGHT = vals[0]
@@ -542,7 +551,7 @@ func OptimizeSources() {
 							continue
 						}
 
-						fundamentals_ratings, _ := GetFundamentalsRatings(incumbents[idx], fundraising[idx], pvi_ests, pvi_weights, nil, generic_ballot)
+						fundamentals_ratings, _ := GetFundamentalsRatings(incumbents[idx], fundraising[idx], pvi_ests, pvi_weights, nil, elasticities[idx], generic_ballot)
 						experts_ratings := CombineRatings([]map[string][2]float64{expert_ratings[idx][0]}, []float64{COOK_WEIGHT})
 						ratings := MergeRatings([]map[string][2]float64{polling_ratings, fundamentals_ratings, experts_ratings})
 						for st, rat := range ratings {
@@ -565,7 +574,7 @@ func OptimizeSources() {
 		},
 	}
 	//vals := []float64{0.749368253464103, 25.153525945790587, 301.1128810616409} // Precomputed values
-	vals := []float64{0.7995439702676344, 22.90325456831519, 302.0708670497893} // Precomputed values
+	vals := []float64{0.8102851928864727, 29.45179266376384, 297.88292721763725} // Precomputed values
 	if false {
 		// Brute-force guess-and-check
 		result, err := optimize.Minimize(prob, vals, &optimize.Settings{FuncEvaluations: 1000}, &optimize.GuessAndCheck{Rander: distmv.NewUniform([]distmv.Bound{{0.0, 10000.0}, {0.0, 10000.0}, {0.0, 10000.0}}, nil)})

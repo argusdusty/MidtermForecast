@@ -2,9 +2,12 @@ package APIs
 
 import (
 	. "MidtermForecast/Utils"
+	"bytes"
+	"encoding/csv"
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"strconv"
 	"strings"
 	"time"
@@ -425,4 +428,69 @@ func Load2016SenatePolls() map[string][]Poll {
 		polls[st] = append(polls[st], poll)
 	}
 	return polls
+}
+
+func Load538HouseElasticities() map[string]float64 {
+	r := LoadCache("https://raw.githubusercontent.com/fivethirtyeight/data/master/political-elasticity-scores/elasticity-by-district.csv", "cache/elasticity-by-district.csv", 48*time.Hour, func(r io.Reader) interface{} {
+		if b, err := ioutil.ReadAll(r); err == nil {
+			return b
+		} else {
+			panic(err)
+		}
+	}).([]byte)
+	reader := csv.NewReader(bytes.NewReader(r))
+	reader.Read() // Skip header line
+	elasticities := make(map[string]float64)
+	for {
+		record, err := reader.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			panic(err)
+		}
+		district := record[0]
+		st := district[:2]
+		dist, err := strconv.Atoi(district[3:])
+		if err != nil {
+			panic(err)
+		}
+		st = get_st_dist(st, int64(dist))
+		elasticity, err := strconv.ParseFloat(record[1], 64)
+		if err != nil {
+			panic(err)
+		}
+		elasticities[st] = elasticity
+	}
+	return elasticities
+}
+
+func Load538SenateElasticities() map[string]float64 {
+	r := LoadCache("https://raw.githubusercontent.com/fivethirtyeight/data/master/political-elasticity-scores/elasticity-by-state.csv", "cache/elasticity-by-state.csv", 48*time.Hour, func(r io.Reader) interface{} {
+		if b, err := ioutil.ReadAll(r); err == nil {
+			return b
+		} else {
+			panic(err)
+		}
+	}).([]byte)
+	reader := csv.NewReader(bytes.NewReader(r))
+	reader.Read() // Skip header line
+	elasticities := make(map[string]float64)
+	for {
+		record, err := reader.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			panic(err)
+		}
+		st := record[0]
+		elasticity, err := strconv.ParseFloat(record[1], 64)
+		if err != nil {
+			panic(err)
+		}
+		elasticities[st] = elasticity
+		elasticities[st+"-2"] = elasticity
+	}
+	return elasticities
 }

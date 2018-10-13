@@ -81,6 +81,9 @@ var (
 
 	house_cnn_forecast  map[string]float64
 	senate_cnn_forecast map[string]float64
+
+	house_elasticities  map[string]float64
+	senate_elasticities map[string]float64
 )
 
 type District struct {
@@ -144,6 +147,9 @@ func setup() {
 
 	house_cnn_forecast = LoadCNNHouseForecast()
 	senate_cnn_forecast = LoadCNNSenateForecast()
+
+	house_elasticities = Load538HouseElasticities()
+	senate_elasticities = Load538SenateElasticities()
 }
 
 func merge_senate_classes(now time.Time) (map[string][2]float64, map[string]map[string][2]float64) {
@@ -175,7 +181,7 @@ func merge_senate_classes(now time.Time) (map[string][2]float64, map[string]map[
 	senate_polls = CombinePolls(polling_data)
 	polling_ratings := GetPollingRatings(senate_polls, election_date)
 	var fundamentals_ratings map[string][2]float64
-	fundamentals_ratings, senate_fundamentals = GetFundamentalsRatings(incumbents, fundraising_senate_ratios, pvi_estimates, pvi_weights, []string{"Cook", "Historical"}, congressional_ballot)
+	fundamentals_ratings, senate_fundamentals = GetFundamentalsRatings(incumbents, fundraising_senate_ratios, pvi_estimates, pvi_weights, []string{"Cook", "Historical"}, senate_elasticities, congressional_ballot)
 	var experts_ratings map[string][2]float64
 	experts_ratings, senate_experts = CombineExpertRatings(expert_ratings, expert_weights, []string{"Cook", "538", "CNN"})
 	ratings := map[string]map[string][2]float64{"polling": polling_ratings, "fundamentals": fundamentals_ratings, "experts": experts_ratings}
@@ -230,7 +236,7 @@ func merge_house_classes(now time.Time) (map[string][2]float64, map[string]map[s
 	house_polls = CombinePolls(polling_data)
 	polling_ratings := GetPollingRatings(house_polls, election_date)
 	var fundamentals_ratings map[string][2]float64
-	fundamentals_ratings, house_fundamentals = GetFundamentalsRatings(incumbents, fundraising_house_ratios, pvi_estimates, pvi_weights, []string{"Cook", "538", "Historical"}, congressional_ballot)
+	fundamentals_ratings, house_fundamentals = GetFundamentalsRatings(incumbents, fundraising_house_ratios, pvi_estimates, pvi_weights, []string{"Cook", "538", "Historical"}, house_elasticities, congressional_ballot)
 	var experts_ratings map[string][2]float64
 	experts_ratings, house_experts = CombineExpertRatings(expert_ratings, expert_weights, []string{"Cook", "538", "CNN"})
 	ratings := map[string]map[string][2]float64{"polling": polling_ratings, "fundamentals": fundamentals_ratings, "experts": experts_ratings}
@@ -267,7 +273,7 @@ func merge_gov_classes(now time.Time) (map[string][2]float64, map[string]map[str
 	gov_polls = CombinePolls(polling_data)
 	polling_ratings := GetPollingRatings(gov_polls, election_date)
 	var fundamentals_ratings map[string][2]float64
-	fundamentals_ratings, gov_fundamentals = GetFundamentalsRatings(incumbents, nil, pvi_estimates, pvi_weights, []string{"Cook", "Historical"}, congressional_ballot)
+	fundamentals_ratings, gov_fundamentals = GetFundamentalsRatings(incumbents, nil, pvi_estimates, pvi_weights, []string{"Cook", "Historical"}, senate_elasticities, congressional_ballot)
 	var experts_ratings map[string][2]float64
 	experts_ratings, gov_experts = CombineExpertRatings(expert_ratings, expert_weights, []string{"Cook"})
 	ratings := map[string]map[string][2]float64{"polling": polling_ratings, "fundamentals": fundamentals_ratings, "experts": experts_ratings}

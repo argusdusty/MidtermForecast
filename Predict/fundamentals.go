@@ -12,10 +12,10 @@ import (
 
 var (
 	// Pre-computed in historical_optimize.go
-	INCUMBENT_ADVANTAGE_PVI = 0.016976345793067837 // Average margin advantage to incumbent over what PVI would expect
-	FUNDRAISING_MULTIPLIER  = 0.02367143350492486  // Gain to generic ballot per doubling of fundraising over your opponent
-	PAST_PVI_WEIGHT         = 0.25473575624092604  // Weight of previous PVI in PVI calculation
-	OVERALL_PVI_WEIGHT      = 0.2392411256694573   // Weight of generic ballot average in PVI calculation
+	INCUMBENT_ADVANTAGE_PVI = 0.017291230141716508 // Average margin advantage to incumbent over what PVI would expect
+	FUNDRAISING_MULTIPLIER  = 0.023715954257800112 // Gain to generic ballot per doubling of fundraising over your opponent
+	PAST_PVI_WEIGHT         = 0.25506964600999965  // Weight of previous PVI in PVI calculation
+	OVERALL_PVI_WEIGHT      = 0.270927780068467    // Weight of generic ballot average in PVI calculation
 	FUNDAMENTALS_WEIGHT     = 22.90325456831519    // Multiplier to beta/dirichlet params for fundamentals margin in forecast. Larger means more confident
 )
 
@@ -90,7 +90,7 @@ func GetBetasFromPVIs(pvis map[string]float64) map[string][2]float64 {
 	return r
 }
 
-func GetFundamentalsRatings(incumbents map[string]string, fundraising_ratios map[string]float64, pvi_estimates []map[string]float64, pvi_weights []float64, pvi_names []string, overall_pvi float64) (map[string][2]float64, RaceFundamentals) {
+func GetFundamentalsRatings(incumbents map[string]string, fundraising_ratios map[string]float64, pvi_estimates []map[string]float64, pvi_weights []float64, pvi_names []string, elasticities map[string]float64, overall_pvi float64) (map[string][2]float64, RaceFundamentals) {
 	steps := make(RaceFundamentals)
 	pvi_est := make(map[string]float64) // Est (D-R)/(D+R)
 	pvi_sw := make(map[string]float64)
@@ -113,8 +113,12 @@ func GetFundamentalsRatings(incumbents map[string]string, fundraising_ratios map
 		if !ok {
 			fr = 1.0
 		}
-		pvi += overall_pvi * OVERALL_PVI_WEIGHT
-		steps[k] = append(steps[k], Fundamental{StepName: "Generic ballot adjustment", Value: overall_pvi, Weight: OVERALL_PVI_WEIGHT})
+		elasticity := elasticities[k]
+		if elasticity == 0.0 {
+			elasticity = 1.0
+		}
+		pvi += overall_pvi * OVERALL_PVI_WEIGHT * elasticity
+		steps[k] = append(steps[k], Fundamental{StepName: "Generic ballot adjustment", Value: overall_pvi * elasticity, Weight: OVERALL_PVI_WEIGHT})
 		pvi += math.Log(fr) / math.Ln2 * FUNDRAISING_MULTIPLIER
 		steps[k] = append(steps[k], Fundamental{StepName: "Fundraising adjustment", Value: math.Log(fr) / math.Ln2 * FUNDRAISING_MULTIPLIER, Weight: 1.0})
 		if incumbents[k] == "D" {

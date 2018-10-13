@@ -15,7 +15,7 @@ import (
 var (
 	// Pre-computed in historical_optimize.go
 	COOK_WEIGHT     = 302.0708670497893
-	COOK_PVI_WEIGHT = 0.3612875782467655
+	COOK_PVI_WEIGHT = 0.3588032283134363
 
 	CookConfidence = [][2]float64{{0.67, 0.33}, {0.56, 0.44}, {0.535, 0.465}, {0.5, 0.5}, {0.5, 0.5}, {0.465, 0.535}, {0.44, 0.56}, {0.33, 0.67}} // Based on 538's analysis of expert forecast margins
 )

@@ -253,7 +253,6 @@ func LoadCNNSenateForecast() map[string]float64 {
 		}
 		r[st] = district.Prediction / 100.0
 	}
-	fmt.Println(r)
 	return r
 }
 

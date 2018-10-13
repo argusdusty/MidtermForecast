@@ -58,12 +58,16 @@ func LoadFundamentals(ftype string, F *RaceFundamentals) (error, time.Time) {
 }
 
 func SaveFundamentals(name string, fundamentals RaceFundamentals) {
-	f, err := os.Create(name)
+	f, err := os.Create(name + ".tmp")
 	if err != nil {
 		panic(err)
 	}
 	enc := json.NewEncoder(f)
 	if err := enc.Encode(fundamentals); err != nil {
+		panic(err)
+	}
+	f.Close()
+	if err := os.Rename(name+".tmp", name); err != nil {
 		panic(err)
 	}
 }

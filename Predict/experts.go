@@ -72,12 +72,16 @@ func LoadExperts(ftype string, E *RaceMapExperts) (error, time.Time) {
 }
 
 func SaveExperts(name string, experts RaceMapExperts) {
-	f, err := os.Create(name)
+	f, err := os.Create(name + ".tmp")
 	if err != nil {
 		panic(err)
 	}
 	enc := json.NewEncoder(f)
 	if err := enc.Encode(experts); err != nil {
+		panic(err)
+	}
+	f.Close()
+	if err := os.Rename(name+".tmp", name); err != nil {
 		panic(err)
 	}
 }

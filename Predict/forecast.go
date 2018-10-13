@@ -243,12 +243,16 @@ func LoadForecast(ftype string, F *Forecast) (error, time.Time) {
 }
 
 func SaveForecast(name string, forecast Forecast) {
-	f, err := os.Create(name)
+	f, err := os.Create(name + ".tmp")
 	if err != nil {
 		panic(err)
 	}
 	enc := json.NewEncoder(f)
 	if err := enc.Encode(forecast); err != nil {
+		panic(err)
+	}
+	f.Close()
+	if err := os.Rename(name+".tmp", name); err != nil {
 		panic(err)
 	}
 }

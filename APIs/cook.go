@@ -77,10 +77,10 @@ func LoadCookSenateRatingsHtml(id uint64) (ratings map[string][2]float64, incumb
 				"TN": "O",
 				"TX": "R",
 			},
-			{},
 			{
 				"MS-2": "R",
 			},
+			{},
 			{
 				"MS": "R",
 				"NE": "R",
@@ -453,13 +453,13 @@ func LoadCookGovRatingsHtml(id uint64) (ratings map[string][2]float64, incumbent
 			},
 			{
 				"CO": "O",
-				"OR": "D",
 				"RI": "D",
 				"NM": "O",
 				"MI": "O",
 			},
 			{
 				"CT": "O",
+				"OR": "D",
 			},
 			{
 				"FL": "O",

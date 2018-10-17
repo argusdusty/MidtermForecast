@@ -67,7 +67,7 @@ func IndexHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Cache-Control", "max-age=3000")
 	WriteHtmlHeader(w, "Forecasts", false, false, false)
 	WriteHtmlLines(w, []string{
-		"<a href=\"https://elections.argusdusty.com\">Election Night Results</a>",
+		//"<a href=\"https://elections.argusdusty.com\">Election Night Results</a>",
 		"<a href=\"/senate\">Senate Forecast</a>",
 		"<a href=\"/house\">House Forecast</a>",
 		"<a href=\"/gov\">Governor Forecast</a>",

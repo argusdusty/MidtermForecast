@@ -23,6 +23,7 @@ var (
 	congressional_ballot float64 = 0.08
 	house_forecast_538           = map[string]float64{} // district -> pvi
 	senate_forecast_538          = map[string]float64{} // district -> pvi
+	gov_forecast_538             = map[string]float64{} // district -> pvi
 	past_senate_pvi              = map[string]float64{}
 	past_house_pvi               = map[string]float64{}
 	past_gov_pvi                 = map[string]float64{
@@ -98,6 +99,7 @@ func setup() {
 	cb := congressional_ballot
 	house_forecast_538, _, congressional_ballot = Load538HouseForecast()
 	senate_forecast_538, _ = Load538SenateForecast()
+	gov_forecast_538, _ = Load538GovForecast()
 	if congressional_ballot == 0.0 {
 		congressional_ballot = cb
 	} else {
@@ -251,8 +253,8 @@ func merge_gov_classes(now time.Time) (map[string][2]float64, map[string]map[str
 		races[k] = struct{}{}
 	}
 
-	expert_ratings := []map[string][2]float64{cook_ratings}
-	expert_weights := []float64{COOK_WEIGHT}
+	expert_ratings := []map[string][2]float64{cook_ratings, GetBetasFromPVIs(gov_forecast_538)}
+	expert_weights := []float64{COOK_WEIGHT / 4, 3 * COOK_WEIGHT / 4}
 
 	polling_data_538 := polls_538_gov
 	f, err := os.Open("extra_gov_polls.json")
@@ -275,7 +277,7 @@ func merge_gov_classes(now time.Time) (map[string][2]float64, map[string]map[str
 	var fundamentals_ratings map[string][2]float64
 	fundamentals_ratings, gov_fundamentals = GetFundamentalsRatings(incumbents, nil, pvi_estimates, pvi_weights, []string{"Cook", "Historical"}, senate_elasticities, congressional_ballot)
 	var experts_ratings map[string][2]float64
-	experts_ratings, gov_experts = CombineExpertRatings(expert_ratings, expert_weights, []string{"Cook"})
+	experts_ratings, gov_experts = CombineExpertRatings(expert_ratings, expert_weights, []string{"Cook", "538"})
 	ratings := map[string]map[string][2]float64{"polling": polling_ratings, "fundamentals": fundamentals_ratings, "experts": experts_ratings}
 
 	return MergeRaces(races, unchallenged_races, ratings, election_date, now)

@@ -128,11 +128,11 @@ func (F Forecast) GetText(name string) []string {
 	var s []string
 	s = append(s, fmt.Sprintf("<a href=\"/\">All Forecasts</a>"))
 	// Step 1. Overall Dem win prob/expected seats
-	if _, ok := F.RaceProbabilities["KS"]; !ok {
+	if name != "gov" {
 		// Not Governors
 		s = append(s, fmt.Sprintf("Dem win probability: %.2f%%", F.DemMajorityProbability*100.0))
-		s = append(s, fmt.Sprintf("Dem expected number of seats: %.2f", F.DemSeatsExpected))
 	}
+	s = append(s, fmt.Sprintf("Dem expected number of seats: %.2f", F.DemSeatsExpected))
 	// Step 2. Close races (10% <-> 90%) Dem win prob
 	var counts [7][]string
 	//sort.Sort(RaceProbabilities(F.RaceProbabilities))

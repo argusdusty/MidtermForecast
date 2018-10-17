@@ -378,6 +378,40 @@ func Load538SenateForecast() (forecast_538 map[string]float64, parties_538 map[s
 	return
 }
 
+func Load538GovForecast() (forecast_538 map[string]float64, parties_538 map[string]map[string]string) {
+	forecast_538 = map[string]float64{}
+	parties_538 = map[string]map[string]string{}
+	data := LoadCache("https://projects.fivethirtyeight.com/2018-midterm-election-forecast/governor/home.json", "cache/538_governor.json", time.Hour, func(r io.Reader) interface{} {
+		dec := json.NewDecoder(r)
+		var data Forecast538
+		if err := dec.Decode(&data); err != nil {
+			panic(err)
+		}
+		return data
+	}).(Forecast538)
+	for _, d := range data.SeatForecasts {
+		st := d.State
+		if st == "US" {
+			continue
+		}
+		parties_538[st] = map[string]string{}
+		voteshares := map[string]float64{}
+		for _, c := range d.Forecast {
+			if c.Party == "U" && c.Candidate == "Bill Walker" {
+				c.Party = "D"
+			}
+			parties_538[st][c.Candidate] = c.Party
+			//winProb := c.Models.Lite.WinProb*0.15 + c.Models.Classic.WinProb*0.35 + c.Models.Deluxe.WinProb*0.5
+			voteShare := c.Models.Lite.VoteShare*0.15 + c.Models.Classic.VoteShare*0.35 + c.Models.Deluxe.VoteShare*0.5
+			voteshares[c.Party] += voteShare
+		}
+		pvi := (voteshares["D"] - voteshares["R"]) / (voteshares["D"] + voteshares["R"])
+		forecast_538[st] = pvi
+	}
+	fmt.Println(forecast_538)
+	return
+}
+
 func Load2016SenatePolls() map[string][]Poll {
 	data := LoadCache("https://projects.fivethirtyeight.com/2016-election-forecast/senate/updates.json", "cache/538_Senate_polls.json", -1, func(r io.Reader) interface{} {
 		dec := json.NewDecoder(r)

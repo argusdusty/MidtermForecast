@@ -408,7 +408,6 @@ func Load538GovForecast() (forecast_538 map[string]float64, parties_538 map[stri
 		pvi := (voteshares["D"] - voteshares["R"]) / (voteshares["D"] + voteshares["R"])
 		forecast_538[st] = pvi
 	}
-	fmt.Println(forecast_538)
 	return
 }
 

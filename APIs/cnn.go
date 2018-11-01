@@ -237,7 +237,7 @@ type CNNForecastSeat struct {
 }
 
 func LoadCNNSenateForecast() map[string]float64 {
-	data := LoadCache("https://data.cnn.com/interactive/2018/stage/senate/overview.json", "cache/CNN_senate_forecast.json", time.Hour, func(r io.Reader) interface{} {
+	data := LoadCache("https://data.cnn.com/interactive/2018/stage/senate/overview.json", "cache/CNN_senate_forecast.json", 20*time.Minute, func(r io.Reader) interface{} {
 		dec := json.NewDecoder(r)
 		var data CNNForecast
 		if err := dec.Decode(&data); err != nil {
@@ -257,7 +257,7 @@ func LoadCNNSenateForecast() map[string]float64 {
 }
 
 func LoadCNNHouseForecast() map[string]float64 {
-	data := LoadCache("https://data.cnn.com/interactive/2018/stage/house/overview.json", "cache/CNN_house_forecast.json", time.Hour, func(r io.Reader) interface{} {
+	data := LoadCache("https://data.cnn.com/interactive/2018/stage/house/overview.json", "cache/CNN_house_forecast.json", 20*time.Minute, func(r io.Reader) interface{} {
 		dec := json.NewDecoder(r)
 		var data CNNForecast
 		if err := dec.Decode(&data); err != nil {

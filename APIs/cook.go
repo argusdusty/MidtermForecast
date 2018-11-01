@@ -61,7 +61,6 @@ func LoadCookSenateRatingsHtml(id uint64) (ratings map[string][2]float64, incumb
 			},
 			{
 				"MN-2": "D",
-				"NJ":   "D",
 				"WV":   "D",
 			},
 			{
@@ -69,6 +68,7 @@ func LoadCookSenateRatingsHtml(id uint64) (ratings map[string][2]float64, incumb
 				"IN": "D",
 				"MO": "D",
 				"MT": "D",
+				"NJ": "D",
 			},
 			{
 				"AZ": "O",
@@ -363,7 +363,7 @@ func LoadCookHouseRatingsHtml(id uint64) (ratings map[string][2]float64, incumbe
 	if id == 0 {
 		url = "https://www.cookpolitical.com/ratings/house-race-ratings"
 		cache = "cache/Cook_House.html"
-		maxAge = time.Hour
+		maxAge = 20 * time.Minute
 	} else {
 		url = fmt.Sprintf("https://www.cookpolitical.com/ratings/house-race-ratings/%d", id)
 		cache = fmt.Sprintf("cache/Cook_%d.html", id)

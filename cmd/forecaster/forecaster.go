@@ -16,7 +16,7 @@ var (
 )
 
 var (
-	election_date                = time.Date(2018, 11, 7, 0, 0, 0, 0, time.UTC)
+	election_date                = time.Date(2018, 11, 6, 11, 0, 0, 0, time.UTC)
 	polls_538_senate             = map[string][]Poll{}
 	polls_538_house              = map[string][]Poll{}
 	polls_538_gov                = map[string][]Poll{}
@@ -286,6 +286,9 @@ func merge_gov_classes(now time.Time) (map[string][2]float64, map[string]map[str
 func forecast() {
 	setup()
 	now := time.Now()
+	if now.After(election_date) {
+		now = election_date
+	}
 	days := election_date.Sub(now).Hours() / 24
 
 	senate_races, senate_sources := merge_senate_classes(now)
@@ -372,7 +375,10 @@ func main() {
 	if len(os.Args) > 1 && os.Args[1] == "once" {
 		return
 	}
-	for range time.Tick(1 * time.Hour) {
+	for range time.Tick(30 * time.Minute) {
 		forecast()
+		if time.Now().After(election_date) {
+			break
+		}
 	}
 }

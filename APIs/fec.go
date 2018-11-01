@@ -19,7 +19,7 @@ func LoadFECRaces(office string, year int) map[string]float64 { // Ratio of D fu
 	fundraising_totals := map[string][2]float64{}
 	url := fmt.Sprintf("https://www.fec.gov/files/bulk-downloads/%d/weball%02d.zip", year, year%100)
 	cache := fmt.Sprintf("cache/fec_weball%d.zip", year)
-	cacheTime := 4 * time.Hour
+	cacheTime := time.Hour
 	if year != 2018 {
 		cacheTime = -1 // Permanently cache
 	}
